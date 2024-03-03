@@ -5,7 +5,7 @@ from pymongo.errors import ServerSelectionTimeoutError
 
 app = FastAPI()
 
-client = MongoClient('127.0.0.1', 27017)
+client = MongoClient('mongo', 27017)
 db = client['instagram']
 collection = db['clients']
 
