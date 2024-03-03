@@ -9,7 +9,7 @@ services:
     depends_on:
       - mongo
     volumes:
-      - .:/app
+      - ./app:/code/app
   mongo:
     image: mongo
     ports:
