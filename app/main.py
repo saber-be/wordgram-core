@@ -147,4 +147,9 @@ def instaToWordGramMapper(instaPost):
             }
         ]
     }
+
+    images = instaPost["resources"]
+    for image in images:
+        wordGramPost["Images"].append({"url": image["thumbnail_url"]})
+
     return wordGramPost
