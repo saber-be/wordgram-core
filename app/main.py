@@ -118,7 +118,7 @@ def update_client_website(instagram_username: str):
         print("Updating client website")       
         #  send request to the client's website
         # url = client["product_webhook_url"]
-        url = "http://192.168.100.3:8080/wp-admin/admin-ajax.php?action=wordgram-product-hook"
+        url = "http://92.246.138.182:81/wp-admin/admin-ajax.php?action=wordgram-product-hook"
         json_data = instaToWordGramMapper(post)
         products.append(json_data)
         re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
