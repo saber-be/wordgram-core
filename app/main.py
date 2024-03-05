@@ -110,16 +110,19 @@ def update_client_website(instagram_username: str):
     posts_collection = db['posts']
     client_collection = db['clients']
     # client = client_collection.find_one({"instagram_username": instagram_username})
-    posts = posts_collection.find({"instagram_user_id": instagram_username})
+    posts = posts_collection.find({"user.username": instagram_username})
     # loop through the posts and update the client's website
     print("Updating client website1")
+    products = []
     for post in posts:
         print("Updating client website")       
         #  send request to the client's website
+        # url = client["product_webhook_url"]
         url = "http://192.168.100.3:8080/wp-admin/admin-ajax.php?action=wordgram-product-hook"
         json_data = instaToWordGramMapper(post)
-
-        requests.post(url, json={"action": "addProduct", "products": [json_data]})
+        products.append(json_data)
+        re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
+        print(re.text)
         
         
     return {'status': 'success', 'message': 'Client website updated successfully'}
@@ -128,11 +131,19 @@ def update_client_website(instagram_username: str):
 
 def instaToWordGramMapper(instaPost):
     print(instaPost)
+    caption = instaPost["caption_text"].split("\n")
+    name = caption[0][:50]
+    description = instaPost["caption_text"]
+    
+    if len(caption) > 1:
+        description = "\n".join(caption[1:])
+
     wordGramPost = {
-        "Name": instaPost["caption_text"][:50],
-        "Description": instaPost["caption_text"],
-        "Price": 9.99,
-        "QTY": 10,
+        "Name": name,
+        "Description": description,
+        "SKU": instaPost["code"],
+        "Price": getPrice(instaPost["caption_text"]),
+        "QTY": 100,
         "tags": [
             {
             "name": "TAG_1"
@@ -141,15 +152,30 @@ def instaToWordGramMapper(instaPost):
             "name": "TAG_2"
             }
         ],
-        "Images": [
-            {
-            "url": instaPost["thumbnail_url"]
-            }
-        ]
+        "Images": []
     }
+    thumbnail = instaPost["thumbnail_url"]
+    if(thumbnail):
+        wordGramPost["Images"].append({"url": thumbnail})
 
     images = instaPost["resources"]
     for image in images:
         wordGramPost["Images"].append({"url": image["thumbnail_url"]})
 
     return wordGramPost
+
+
+
+
+def getPrice(caption):
+    # example : قیمت💰: 448 تومان 
+    # output : 448
+    price = 0
+    caption = caption.split("\n")
+    for line in caption:
+        if "قیمت" in line:
+            price = line
+            price = ''.join(filter(str.isdigit, price))
+            price = int(price) * 1000
+            break
+    return price
