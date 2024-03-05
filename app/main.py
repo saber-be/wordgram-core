@@ -88,10 +88,13 @@ def sync_shop(instagram_username: str):
         #  if instance of URL
         # set instagram_id unique in the collection
         json_data["instagram_id"] = json_data["id"]
-        json_data["created_at"] = datetime.datetime.now()
+        json_data["updated_at"] = datetime.datetime.now()
+        old_data = collection.find_one({"instagram_id": json_data["instagram_id"]})
         # insert to mongodb
-        if collection.find_one({"instagram_id": json_data["instagram_id"]}) is None:
+        if old_data is None:
             print("Inserting to mongodb")
+            json_data["created_at"] = datetime.datetime.now()
+            json_data["published_at"] = None
             try:
                 collection.insert_one(json_data)
             except:
@@ -99,8 +102,17 @@ def sync_shop(instagram_username: str):
         else:
             print("Updating to mongodb")
             # update the document
-            collection.update_one(
-                {"instagram_id": json_data["instagram_id"]}, {"$set": json_data})
+            excepted_keys = ['created_at', 'updated_at', 'taken_at', 'video_url', 'image_versions2', 'user']
+            compared_keys = ['caption_text']
+            changed_keys = []
+            for key in json_data:
+                if key in old_data and key not in excepted_keys and key in compared_keys and old_data[key] != json_data[key]:
+                    changed_keys.append(key)
+            if len(changed_keys) > 0:
+                json_data['changed_keys'] = changed_keys
+                collection.update_one(
+                    {"instagram_id": json_data["instagram_id"]}, {"$set": json_data})
+
     return {'status': 'success', 'message': 'Shop synced successfully'}
 
 @app.get('/update-client-website')
@@ -109,7 +121,7 @@ def update_client_website(instagram_username: str):
     # get posts from mongodb and update the client's website
     posts_collection = db['posts']
     client_collection = db['clients']
-    # client = client_collection.find_one({"instagram_username": instagram_username})
+    client = client_collection.find_one({"instagram_username": instagram_username})
     posts = posts_collection.find({"user.username": instagram_username})
     # loop through the posts and update the client's website
     print("Updating client website1")
@@ -117,11 +129,16 @@ def update_client_website(instagram_username: str):
     for post in posts:
         print("Updating client website")       
         #  send request to the client's website
-        # url = client["product_webhook_url"]
-        url = "http://92.246.138.182:8081/wp-admin/admin-ajax.php?action=wordgram-product-hook"
+        url = client["product_webhook_url"]
+        # url = "http://192.168.100.9:8081/wp-admin/admin-ajax.php?action=wordgram-product-hook"
+        if 'published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]:
+            continue
         json_data = instaToWordGramMapper(post)
         products.append(json_data)
         re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
+        if re.status_code == 200:
+            posts_collection.update_one(
+                {"instagram_id": post["instagram_id"]}, {"$set": {"published_at": datetime.datetime.now()}})
         print(re.text)
         
         
