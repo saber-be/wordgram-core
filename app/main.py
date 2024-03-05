@@ -138,20 +138,14 @@ def instaToWordGramMapper(instaPost):
     if len(caption) > 1:
         description = "\n".join(caption[1:])
 
+    tags, clean_description = getTagsAndCaption(description)
     wordGramPost = {
         "Name": name,
-        "Description": description,
+        "Description": clean_description,
         "SKU": instaPost["code"],
         "Price": getPrice(instaPost["caption_text"]),
         "QTY": 100,
-        "tags": [
-            {
-            "name": "TAG_1"
-            },
-            {
-            "name": "TAG_2"
-            }
-        ],
+        "tags": getPostTags(tags),
         "Images": []
     }
     thumbnail = instaPost["thumbnail_url"]
@@ -176,6 +170,33 @@ def getPrice(caption):
         if "قیمت" in line:
             price = line
             price = ''.join(filter(str.isdigit, price))
-            price = int(price) * 1000
+            if price.isdigit():
+                price = int(price) * 1000
             break
     return price
+
+def getTagsAndCaption(caption):
+    # example : #tag1 #tag2
+    # output : ["tag1", "tag2"]
+    tags = []
+    lines = caption.split("\n")
+    clean_caption = caption
+    for line in lines:
+        if "#" in line:
+            line = line.replace(",", " ")
+            line = line.replace("#", " #")
+            line_tags = line.split(" ")
+            line_tags = [tag[1:] for tag in line_tags if tag.startswith("#")]
+            tags = tags + line_tags
+    # remove tags from clean_caption
+    for tag in tags:
+        clean_caption = clean_caption.replace(f"#{tag}", "")
+    return tags, clean_caption
+
+def getPostTags(tags):
+    # example : ["tag1", "tag2"]
+    # output : [{"name": "tag1"}, {"name": "tag2"}]
+    postTags = []
+    for tag in tags:
+        postTags.append({"name": tag})
+    return postTags
