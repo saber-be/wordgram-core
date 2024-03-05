@@ -118,7 +118,7 @@ def update_client_website(instagram_username: str):
         print("Updating client website")       
         #  send request to the client's website
         # url = client["product_webhook_url"]
-        url = "http://92.246.138.182:81/wp-admin/admin-ajax.php?action=wordgram-product-hook"
+        url = "http://92.246.138.182:8081/wp-admin/admin-ajax.php?action=wordgram-product-hook"
         json_data = instaToWordGramMapper(post)
         products.append(json_data)
         re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
@@ -172,7 +172,7 @@ def getPrice(caption):
             price = ''.join(filter(str.isdigit, price))
             if price.isdigit():
                 price = int(price) * 1000
-            break
+                break
     return price
 
 def getTagsAndCaption(caption):
