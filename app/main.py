@@ -19,7 +19,7 @@ db = client['instagram']
 
 @app.get("/")
 def read_root():
-    return {"Hello": "World"}
+    return {"Hello": os.environ.get('ACCOUNT_USERNAME')}
 
 
 @app.get('/register-shop')

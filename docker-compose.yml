@@ -5,7 +5,10 @@ services:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 81:80
+      - ${PORT}:80
+    environment:
+      - ACCOUNT_USERNAME=${ACCOUNT_USERNAME}
+      - ACCOUNT_PASSWORD=${ACCOUNT_PASSWORD}
     depends_on:
       - mongo
     volumes:
