@@ -225,7 +225,31 @@ def fetch_all_posts_from_all_accounts():
     # fetch all posts from all client accounts
     collection = db['clients']
     clients = collection.find()
+    collectionLogs = db['logs']
     for client in clients:
-        sync_shop(client["instagram_username"])
+        try:
+            data = {
+                "user_name": client["instagram_username"],
+                "start_fetch_post": datetime.datetime.now(),
+            }
+            collectionLogs.insert_one(data)
+            sync_shop(client["instagram_username"])
+            data = {
+                "user_name": client["instagram_username"],
+                "end_sync_shop": datetime.datetime.now(),
+            }
+            collectionLogs.insert_one(data)
+            update_client_website(client["instagram_username"])
+            data = {
+                "user_name": client["instagram_username"],
+                "end_update_client_website": datetime.datetime.now(),
+            }
+            collectionLogs.insert_one(data)
+        except Exception as e:
+            data = {
+                "user_name": client["instagram_username"],
+                "error": str(e),
+            }
+            collectionLogs.insert_one(data)
         print("Updating client website")
     return {'status': 'success', 'message': 'All posts fetched successfully'}
