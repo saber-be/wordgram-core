@@ -53,6 +53,7 @@ def register_shop(shop_name: str, platform: str, platform_url: str, redirect_url
 @app.get('/fetch-from-instagram')
 def sync_shop(instagram_username: str):
     # http://localhost:81/sync-shop?instagram_username=mosakbary
+    # http://localhost:81/fetch-from-instagram?instagram_username=59378186213
     # load c1 object from the pickle file
     ACCOUNT_USERNAME = os.environ.get('ACCOUNT_USERNAME')
     ACCOUNT_PASSWORD = os.environ.get('ACCOUNT_PASSWORD')
@@ -217,3 +218,13 @@ def getPostTags(tags):
     for tag in tags:
         postTags.append({"name": tag})
     return postTags
+
+@app.get('/fetch-all-posts')
+def fetch_all_posts_from_all_accounts():
+    # http://localhost:81/fetch-all-posts
+    # fetch all posts from all client accounts
+    collection = db['clients']
+    clients = collection.find()
+    for client in clients:
+        sync_shop(client["instagram_username"])
+    return {'status': 'success', 'message': 'All posts fetched successfully'}
