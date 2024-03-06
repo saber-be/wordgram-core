@@ -227,4 +227,5 @@ def fetch_all_posts_from_all_accounts():
     clients = collection.find()
     for client in clients:
         sync_shop(client["instagram_username"])
+        print("Updating client website")
     return {'status': 'success', 'message': 'All posts fetched successfully'}

@@ -19,3 +19,9 @@ services:
       - 27018:27017
     volumes:
       - ./data:/data/db
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    # Add other configurations for your scheduler service

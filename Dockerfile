@@ -6,10 +6,12 @@ WORKDIR /code
 
 # 
 COPY ./requirements.txt /code/requirements.txt
+COPY ./scheduler.py /code/scheduler.py
 
 # 
 RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN apt-get update && apt-get install -y supervisor
 
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# remove --reload for production
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80", "--reload"]
+CMD ["/usr/bin/supervisord"]
