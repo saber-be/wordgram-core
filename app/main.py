@@ -9,6 +9,7 @@ import pydantic_core
 from instagrapi import Client
 from pymongo import MongoClient
 import os
+import re
 
 app = FastAPI()
 
@@ -196,19 +197,15 @@ def getPrice(caption):
 def getTagsAndCaption(caption):
     # example : #tag1 #tag2
     # output : ["tag1", "tag2"]
-    tags = []
-    lines = caption.split("\n")
     clean_caption = caption
-    for line in lines:
-        if "#" in line:
-            line = line.replace(",", " ")
-            line = line.replace("#", " #")
-            line_tags = line.split(" ")
-            line_tags = [tag[1:] for tag in line_tags if tag.startswith("#")]
-            tags = tags + line_tags
+    if "#" in caption:
+        caption = caption.replace(",", " ")
+        caption = caption.replace("#", " #")
+        caption_tags = caption.split(" ")
+        tags = [tag[1:] for tag in caption_tags if tag.startswith("#")]
     # remove tags from clean_caption
     for tag in tags:
-        clean_caption = clean_caption.replace(f"#{tag}", "")
+        clean_caption = re.sub(rf"#{tag}\b", "", clean_caption)
     return tags, clean_caption
 
 def getPostTags(tags):
