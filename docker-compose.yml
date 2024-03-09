@@ -9,6 +9,8 @@ services:
     environment:
       - ACCOUNT_USERNAME=${ACCOUNT_USERNAME}
       - ACCOUNT_PASSWORD=${ACCOUNT_PASSWORD}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
     depends_on:
       - mongo
     volumes:

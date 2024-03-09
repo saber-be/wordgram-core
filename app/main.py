@@ -13,14 +13,14 @@ import re
 
 app = FastAPI()
 
-client = MongoClient('mongo', 27017)
+client = MongoClient(os.environ.get('MONGO_HOST'), int(os.environ.get('MONGO_PORT')))
 db = client['instagram']
 
 
 
 @app.get("/")
 def read_root():
-    return {"Hello": os.environ.get('ACCOUNT_USERNAME')}
+    return {"Hello": os.environ.get('MONGO_HOST')}
 
 
 @app.get('/register-shop')
@@ -198,6 +198,7 @@ def getTagsAndCaption(caption):
     # example : #tag1 #tag2
     # output : ["tag1", "tag2"]
     clean_caption = caption
+    tags = []
     if "#" in caption:
         caption = caption.replace(",", " ")
         caption = caption.replace("#", " #")
