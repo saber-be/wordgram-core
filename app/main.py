@@ -10,7 +10,7 @@ from instagrapi import Client
 from pymongo import MongoClient
 import os
 import re
-
+from .model.Shop import Shop
 app = FastAPI()
 
 client = MongoClient(os.environ.get('MONGO_HOST'), int(os.environ.get('MONGO_PORT')))
@@ -23,31 +23,23 @@ def read_root():
     return {"Hello": os.environ.get('MONGO_HOST')}
 
 
-@app.get('/register-shop')
-def register_shop(shop_name: str, platform: str, platform_url: str, redirect_url: str, product_webhook_url: str, order_webhook_url: str, instagram_username: str):
+@app.post('/register-shop', response_model=dict)
+def register_shop(shop:Shop):
     # http://localhost:81/register-shop?shop_name=WordGram&platform=WordPress/WooCommerce&platform_url=http://localhost:8080&redirect_url=http://localhost:8080/wp-admin/admin-post.php?action=wordgram-connect-response&state=4186665e47da5dd33b&product_webhook_url=http://localhost:8080/wp-admin/admin-ajax.php?action=wordgram-product-hook&order_webhook_url=http://localhost:8080/wp-admin/admin-ajax.php?action=wordgram-order-hook&instagram_username=mosakbary
-    data = {
-        'shop_name': shop_name,
-        'platform': platform,
-        'platform_url': platform_url,
-        'redirect_url': redirect_url,
-        'product_webhook_url': product_webhook_url,
-        'order_webhook_url': order_webhook_url,
-        'instagram_username': instagram_username,
-        'created_at': datetime.datetime.now()
-    }
+    
+    shop.created_at = datetime.datetime.now()
     # insert to mongodb
     collection = db['clients']
     try:
-        if collection.find_one({"instagram_username": data["instagram_username"]}) is None:
-            print("Inserting to mongodb")
-            collection.insert_one(data)
+        if collection.find_one({"instagram_username": shop.instagram_username}) is None:
+            print("Inserting to mongodb" ,shop.instagram_username)
+            collection.insert_one(shop.__dict__)
         else:
-            print("Updating to mongodb")
+            print("Updating to mongodb", shop.instagram_username)
             # update the document
             collection.update_one(
-                {"instagram_username": data["instagram_username"]}, {"$set": data})
-        return {'status': 'success', 'message': 'Shop registered successfully'}
+                {"instagram_username": shop.instagram_username}, {"$set": shop.__dict__})
+        return {'status': 'success', 'message': 'Shop registered successfully', 'data': shop.__dict__}
     except ServerSelectionTimeoutError:
         return {'status': 'error', 'message': 'Failed to connect to the MongoDB server'}
 
