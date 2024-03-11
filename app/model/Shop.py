@@ -6,10 +6,10 @@ from pydantic import BaseModel, HttpUrl
 class Shop(BaseModel):
     shop_name: str
     platform: str
-    platform_url: HttpUrl
-    redirect_url: HttpUrl
-    product_webhook_url: HttpUrl
-    order_webhook_url: HttpUrl
+    platform_url: str
+    redirect_url: str
+    product_webhook_url: str
+    order_webhook_url: str
     instagram_username: str
     params: Optional[dict] = None
     created_at: Optional[datetime.datetime] = None

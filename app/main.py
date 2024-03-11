@@ -11,6 +11,7 @@ from pymongo import MongoClient
 import os
 import re
 from .model.Shop import Shop
+from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 
 client = MongoClient(os.environ.get('MONGO_HOST'), int(os.environ.get('MONGO_PORT')))
@@ -22,6 +23,13 @@ db = client['instagram']
 def read_root():
     return {"Hello": os.environ.get('MONGO_HOST')}
 
+# Add CORS middleware to allow OPTIONS request
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.post('/register-shop', response_model=dict)
 def register_shop(shop:Shop):
