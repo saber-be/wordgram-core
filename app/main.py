@@ -9,10 +9,11 @@ import pydantic_core
 from instagrapi import Client
 from pymongo import MongoClient
 import os
-import re
+
 from app.models.shop import Shop
 from app.api import log
 from app.services.log_service import LogService
+from app.services.post_reader_service import PostReaderService
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 app.include_router(log.router)
@@ -135,10 +136,10 @@ def update_client_website(instagram_username: str):
         print("Updating client website")       
         #  send request to the client's website
         url = client["product_webhook_url"]
-        # url = "http://192.168.100.9:8081/wp-admin/admin-ajax.php?action=wordgram-product-hook"
+        # url = "http://localhost:8082/wp-admin/admin-ajax.php?action=wordgram-product-hook"
         if 'published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]:
             continue
-        json_data = instaToWordGramMapper(post)
+        json_data = PostReaderService.instaToWordGramMapper(post)
         products.append(json_data)
         re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
         if re.status_code == 200:
@@ -151,74 +152,6 @@ def update_client_website(instagram_username: str):
     
 
 
-def instaToWordGramMapper(instaPost):
-    print(instaPost)
-    caption = instaPost["caption_text"].split("\n")
-    name = caption[0][:50]
-    description = instaPost["caption_text"]
-    
-    if len(caption) > 1:
-        description = "\n".join(caption[1:])
-
-    tags, clean_description = getTagsAndCaption(description)
-    wordGramPost = {
-        "Name": name,
-        "Description": clean_description,
-        "SKU": instaPost["code"],
-        "Price": getPrice(instaPost["caption_text"]),
-        "QTY": 100,
-        "tags": getPostTags(tags),
-        "Images": []
-    }
-    thumbnail = instaPost["thumbnail_url"]
-    if(thumbnail):
-        wordGramPost["Images"].append({"url": thumbnail})
-
-    images = instaPost["resources"]
-    for image in images:
-        wordGramPost["Images"].append({"url": image["thumbnail_url"]})
-
-    return wordGramPost
-
-
-
-
-def getPrice(caption):
-    # example : قیمت💰: 448 تومان 
-    # output : 448
-    price = 0
-    caption = caption.split("\n")
-    for line in caption:
-        if "قیمت" in line:
-            price = line
-            price = ''.join(filter(str.isdigit, price))
-            if price.isdigit():
-                price = int(price) * 1000
-                break
-    return price
-
-def getTagsAndCaption(caption):
-    # example : #tag1 #tag2
-    # output : ["tag1", "tag2"]
-    clean_caption = caption
-    tags = []
-    if "#" in caption:
-        caption = caption.replace(",", " ")
-        caption = caption.replace("#", " #")
-        caption_tags = caption.split(" ")
-        tags = [tag[1:] for tag in caption_tags if tag.startswith("#")]
-    # remove tags from clean_caption
-    for tag in tags:
-        clean_caption = re.sub(rf"#{tag}\b", "", clean_caption)
-    return tags, clean_caption
-
-def getPostTags(tags):
-    # example : ["tag1", "tag2"]
-    # output : [{"name": "tag1"}, {"name": "tag2"}]
-    postTags = []
-    for tag in tags:
-        postTags.append({"name": tag})
-    return postTags
 
 @app.get('/fetch-all-posts')
 def fetch_all_posts_from_all_accounts():

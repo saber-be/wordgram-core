@@ -10,6 +10,7 @@ services:
       - DEBUG=${DEBUG}
       - ACCOUNT_USERNAME=${ACCOUNT_USERNAME}
       - ACCOUNT_PASSWORD=${ACCOUNT_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
       - MONGO_HOST=${MONGO_HOST}
       - MONGO_PORT=${MONGO_PORT}
     depends_on:
