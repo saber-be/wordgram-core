@@ -10,12 +10,15 @@ from instagrapi import Client
 from pymongo import MongoClient
 import os
 import re
-from .model.Shop import Shop
+from app.models.shop import Shop
+from app.api import log
+from app.services.log_service import LogService
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
-
+app.include_router(log.router)
 client = MongoClient(os.environ.get('MONGO_HOST'), int(os.environ.get('MONGO_PORT')))
-db = client['instagram']
+db = client[os.environ.get('MONGO_DB')]
+log_service = LogService()
 
 
 
