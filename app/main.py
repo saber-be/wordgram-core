@@ -11,6 +11,7 @@ from pymongo import MongoClient
 import os
 import logging
 from app.models.shop import Shop
+from app.models.updateWebSiteRequest import updateWebSiteRequest
 from app.api import log
 from app.services.log_service import MongoHandler
 from app.services.post_reader_service import PostReaderService
@@ -130,14 +131,20 @@ def sync_shop(instagram_username: str):
 
     return {'status': 'success', 'message': 'Shop synced successfully'}
 
-@app.get('/update-client-website')
-def update_client_website(instagram_username: str):
+@app.post('/update-client-website')
+def update_client_website(update_request: updateWebSiteRequest):
     # http://localhost:81/update-client-website?instagram_username=mosakbary
     # get posts from mongodb and update the client's website
     posts_collection = db['posts']
     client_collection = db['clients']
+    instagram_username = update_request.instagram_username
     client = client_collection.find_one({"instagram_username": instagram_username})
-    posts = posts_collection.find({"user.username": instagram_username})
+    if client is None:
+        return {'status': 'error', 'message': 'Client not found'}
+    post_query = {"user.username": instagram_username}
+    if update_request.SUK is not None:
+        post_query["code"] = update_request.SUK
+    posts = posts_collection.find(post_query)
     # loop through the posts and update the client's website
     print("Updating client website1")
     products = []
@@ -146,9 +153,9 @@ def update_client_website(instagram_username: str):
         #  send request to the client's website
         url = client["product_webhook_url"]
         # url = "http://localhost:8082/wp-admin/admin-ajax.php?action=wordgram-product-hook"
-        if 'published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]:
+        if update_request.force_update == False or ('published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]):
             continue
-        json_data = PostReaderService.instaToWordGramMapper(post)
+        json_data = PostReaderService.instaToWordGramMapper(post, update_request)
         products.append(json_data)
         re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
         if re.status_code == 200:
