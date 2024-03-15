@@ -13,7 +13,7 @@ import logging
 from app.models.shop import Shop
 from app.models.updateWebSiteRequest import updateWebSiteRequest
 from app.api import log
-from app.services.log_service import MongoHandler
+from app.services.log_service import MongoHandler , FileHandler
 from app.services.post_reader_service import PostReaderService
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
@@ -23,18 +23,20 @@ db = client[os.environ.get('MONGO_DB')]
 
 
 logging.basicConfig(level=logging.DEBUG)
-handler = MongoHandler()
-logging.getLogger().addHandler(handler)
+mongo_handler = MongoHandler()
+file_handler = FileHandler('logs')
+
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
+mongo_handler.setFormatter(formatter)
+file_handler.setFormatter(formatter)
+
+logging.getLogger().addHandler(mongo_handler)
+logging.getLogger().addHandler(file_handler)
 
 
 
 @app.get("/")
 def read_root():
-    try:
-        raise ValueError("An error occurred")
-    except Exception as e:
-        logging.error(e)
-        return {"Hello": "World"}
     return {"Hello": os.environ.get('MONGO_HOST')}
 
 # Add CORS middleware to allow OPTIONS request

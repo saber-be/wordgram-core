@@ -15,8 +15,15 @@ services:
       - MONGO_PORT=${MONGO_PORT}
     depends_on:
       - mongo
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "10"
     volumes:
       - ./app:/code/app
+      - ./logs:/code/logs
+      - ./docker-logs:/var/log
   mongo:
     image: mongo
     ports:

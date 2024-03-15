@@ -5,4 +5,3 @@ class Log(BaseModel):
     message: str
     level: str
     timestamp: datetime = datetime.now()
-    error_details: dict = None

@@ -4,6 +4,7 @@ from pymongo import MongoClient
 from app.models.log import Log
 from typing import List
 import os
+import datetime
 
 class LogService:
     def __init__(self):
@@ -34,15 +35,19 @@ class MongoHandler(logging.Handler):
 
     def emit(self, record):
         log_entry = {
-            "message": record.getMessage(),
+            "message": self.format(record),
             "level": record.levelname,
-            "timestamp": record.created,
-            "error_details": None
+            "timestamp": record.created
         }
-        if record.exc_info:
-            log_entry["error_details"] = {
-                "exception": record.exc_info[0],
-                "message": record.exc_info[1],
-                "traceback": traceback.format_exc()
-            }
         self.log_service.save_log(log_entry)
+
+class FileHandler(logging.Handler):
+    def __init__(self, dir_path: str):
+        super().__init__()
+        self.dir_path = dir_path
+
+    def emit(self, record):
+        file_path = os.path.join(self.dir_path, datetime.datetime.now().strftime("%Y-%m-%d") + ".log")
+        with open(file_path, 'a') as file:
+            log_message = self.format(record)
+            file.write(log_message + "\n")
