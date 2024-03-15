@@ -1,5 +1,5 @@
 import requests
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pymongo import MongoClient
 import datetime
 from pymongo.errors import ServerSelectionTimeoutError
@@ -15,14 +15,17 @@ from app.models.updateWebSiteRequest import updateWebSiteRequest
 from app.api import log
 from app.services.log_service import MongoHandler , FileHandler
 from app.services.post_reader_service import PostReaderService
+from app.services.kafka_service import KafkaService, KAFKA_TOPIC
 from fastapi.middleware.cors import CORSMiddleware
+
+
 app = FastAPI()
 app.include_router(log.router)
 client = MongoClient(os.environ.get('MONGO_HOST'), int(os.environ.get('MONGO_PORT')))
 db = client[os.environ.get('MONGO_DB')]
 
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 mongo_handler = MongoHandler()
 file_handler = FileHandler('logs')
 
@@ -32,6 +35,10 @@ file_handler.setFormatter(formatter)
 
 logging.getLogger().addHandler(mongo_handler)
 logging.getLogger().addHandler(file_handler)
+
+kafka_service = KafkaService()
+
+
 
 
 
@@ -180,3 +187,13 @@ def fetch_all_posts_from_all_accounts():
     for client in clients:
         sync_shop(client["instagram_username"])
     return {'status': 'success', 'message': 'All posts fetched successfully'}
+
+@app.post("/produce/")
+def produce_message(message: str):
+    try:
+        producer = kafka_service.kafka_producer()
+        producer.send(KAFKA_TOPIC, message.encode('utf-8'))
+        producer.flush()
+        return {"status": "success", "message": "Message sent successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to produce message: {e}")
