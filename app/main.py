@@ -11,12 +11,14 @@ from pymongo import MongoClient
 import os
 import logging
 from app.models.shop import Shop
+from app.models.certificate import Certificate
 from app.models.updateWebSiteRequest import updateWebSiteRequest
 from app.api import log
 from app.services.log_service import MongoHandler , FileHandler
 from app.services.post_reader_service import PostReaderService
 from app.services.kafka_service import KafkaService, KAFKA_TOPIC
 from fastapi.middleware.cors import CORSMiddleware
+import secrets
 
 
 app = FastAPI()
@@ -54,25 +56,57 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.post('/register-shop', response_model=dict)
-def register_shop(shop:Shop):
-    # http://localhost:81/register-shop?shop_name=WordGram&platform=WordPress/WooCommerce&platform_url=http://localhost:8080&redirect_url=http://localhost:8080/wp-admin/admin-post.php?action=wordgram-connect-response&state=4186665e47da5dd33b&product_webhook_url=http://localhost:8080/wp-admin/admin-ajax.php?action=wordgram-product-hook&order_webhook_url=http://localhost:8080/wp-admin/admin-ajax.php?action=wordgram-order-hook&instagram_username=mosakbary
-    
-    shop.created_at = datetime.datetime.now()
+def register_shop(shop: Shop):
+    if shop.shop_name == "" or shop.platform == "" \
+            or shop.platform_url == "" or shop.redirect_url == "" \
+            or shop.product_webhook_url == "" or shop.order_webhook_url == "" \
+            or shop.instagram_username == "":
+        return {'status': 'error', 'message': 'Please fill all the required fields'}
+
     # insert to mongodb
     collection = db['clients']
     try:
+        message = 'Shop registered successfully'
         if collection.find_one({"instagram_username": shop.instagram_username}) is None:
-            print("Inserting to mongodb" ,shop.instagram_username)
-            collection.insert_one(shop.__dict__)
+            shop.created_at = datetime.datetime.now()
+            shop.api_key = secrets.token_hex(16)
+            print("Inserting to mongodb", shop.instagram_username)
+            insert_data = shop.__dict__
+            collection.insert_one(insert_data)
+            data = insert_data
         else:
+            message = 'Shop updated successfully'
             print("Updating to mongodb", shop.instagram_username)
             # update the document
+            update_data = shop.__dict__
+            freeze_columns = ['created_at', 'state', 'api_key']
+            for column in freeze_columns:
+                update_data.pop(column, None)
             collection.update_one(
-                {"instagram_username": shop.instagram_username}, {"$set": shop.__dict__})
-        return {'status': 'success', 'message': 'Shop registered successfully', 'data': shop.__dict__}
+                {"instagram_username": shop.instagram_username}, {"$set": update_data})
+            data = collection.find_one(
+                {"instagram_username": shop.instagram_username})
+            data = {key: data[key] for key in data if key != "_id"}
+        return {'status': 'success', 'message': message, 'data': data}
     except ServerSelectionTimeoutError:
         return {'status': 'error', 'message': 'Failed to connect to the MongoDB server'}
+
+
+@app.post('/is-connect', response_model=dict)
+def is_connect(certificate: Certificate):
+    collection = db['clients']
+    query_find = {
+        "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key}
+    user = collection.find_one(query_find)
+    if user is None:
+        return {'status': 'error', 'message': 'Client not found'}
+    data = {key: user[key] for key in user if key != "_id"}
+    response = {'status': 'success',
+                'success': True, 'message': 'Client found'}
+    response.update(data)
+    return response
 
 @app.get('/fetch-from-instagram')
 def sync_shop(instagram_username: str):
