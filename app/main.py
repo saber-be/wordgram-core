@@ -9,22 +9,31 @@ import pydantic_core
 from instagrapi import Client
 from pymongo import MongoClient
 import os
-
+import logging
 from app.models.shop import Shop
 from app.api import log
-from app.services.log_service import LogService
+from app.services.log_service import MongoHandler
 from app.services.post_reader_service import PostReaderService
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI()
 app.include_router(log.router)
 client = MongoClient(os.environ.get('MONGO_HOST'), int(os.environ.get('MONGO_PORT')))
 db = client[os.environ.get('MONGO_DB')]
-log_service = LogService()
+
+
+logging.basicConfig(level=logging.DEBUG)
+handler = MongoHandler()
+logging.getLogger().addHandler(handler)
 
 
 
 @app.get("/")
 def read_root():
+    try:
+        raise ValueError("An error occurred")
+    except Exception as e:
+        logging.error(e)
+        return {"Hello": "World"}
     return {"Hello": os.environ.get('MONGO_HOST')}
 
 # Add CORS middleware to allow OPTIONS request
