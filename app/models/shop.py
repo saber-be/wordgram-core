@@ -10,6 +10,8 @@ class Shop(BaseModel):
     redirect_url: str
     product_webhook_url: str
     order_webhook_url: str
+    state: str
+    api_key: Optional[str]
     instagram_username: str
     params: Optional[dict] = None
     created_at: Optional[datetime.datetime] = None
@@ -22,6 +24,7 @@ class Shop(BaseModel):
                 "redirect_url": "https://example.com/redirect",
                 "product_webhook_url": "https://example.com/webhook/product",
                 "order_webhook_url": "https://example.com/webhook/order",
+                "state": "123456",
                 "instagram_username": "my_shop",
                 "params": {"key": "value"},
                 "created_at": "2022-01-01T00:00:00.000Z"
