@@ -84,6 +84,7 @@ def register_shop(shop: Shop):
             freeze_columns = ['created_at', 'state', 'api_key']
             for column in freeze_columns:
                 update_data.pop(column, None)
+            update_data["disconnect_at"] = None
             collection.update_one(
                 {"instagram_username": shop.instagram_username}, {"$set": update_data})
             data = collection.find_one(
@@ -98,13 +99,28 @@ def register_shop(shop: Shop):
 def is_connect(certificate: Certificate):
     collection = db['clients']
     query_find = {
-        "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key}
+        "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key, "disconnect_at": None}
     user = collection.find_one(query_find)
     if user is None:
         return {'status': 'error', 'message': 'Client not found'}
     data = {key: user[key] for key in user if key != "_id"}
     response = {'status': 'success',
                 'success': True, 'message': 'Client found'}
+    response.update(data)
+    return response
+
+@app.post('/disconnect-shop', response_model=dict)
+def disconnect_shop(certificate: Certificate):
+    collection = db['clients']
+    query_find = {
+        "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key}
+    user = collection.find_one(query_find)
+    if user is None:
+        return {'status': 'error', 'message': 'Client not found'}
+    
+    collection.update_one(query_find, {"$set": {"disconnect_at": datetime.datetime.now()}})
+    data = {key: user[key] for key in user if key != "_id"}
+    response = {'status': 'success', 'success': True, 'message': 'Client disconnected successfully'}
     response.update(data)
     return response
 
@@ -181,7 +197,7 @@ def update_client_website(update_request: updateWebSiteRequest):
     posts_collection = db['posts']
     client_collection = db['clients']
     instagram_username = update_request.instagram_username
-    client = client_collection.find_one({"instagram_username": instagram_username})
+    client = client_collection.find_one({"instagram_username": instagram_username, "disconnect_at": None})
     if client is None:
         return {'status': 'error', 'message': 'Client not found'}
     post_query = {"user.username": instagram_username}
@@ -217,7 +233,7 @@ def fetch_all_posts_from_all_accounts():
     # http://localhost:81/fetch-all-posts
     # fetch all posts from all client accounts
     collection = db['clients']
-    clients = collection.find()
+    clients = collection.find({"disconnect_at": None})
     for client in clients:
         sync_shop(client["instagram_username"])
     return {'status': 'success', 'message': 'All posts fetched successfully'}
