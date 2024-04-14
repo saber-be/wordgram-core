@@ -1,3 +1,4 @@
+import json
 import requests
 from fastapi import FastAPI, HTTPException
 import datetime
@@ -130,7 +131,8 @@ def sync_shop(instagram_username: str):
     message_dict = {
         "instagram_username": instagram_username
     }
-    kafka_service.kafka_producer().send(TOPIC_FETCH_FROM_INSTAGRAM, str(message_dict).encode('utf-8'))
+    message_json = json.dumps(message_dict).encode('utf-8')
+    kafka_service.kafka_producer().send(TOPIC_FETCH_FROM_INSTAGRAM, message_json)
     return {'status': 'success', 'message': 'The sync process has started'}
 
 @app.post('/update-client-website')

@@ -10,8 +10,8 @@ class KafkaService:
         pass
     def kafka_producer(self):
         return KafkaProducer(bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS)
-    def kafka_consumer(self, group_id):
-        return KafkaConsumer(KAFKA_TOPIC,
-                             group_id=group_id,
+    def kafka_consumer(self,topic:str, group_id = None):
+        return KafkaConsumer(topic,
+                             group_id = ( group_id if group_id else topic ),
                              bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
                              auto_offset_reset='earliest')
