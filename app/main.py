@@ -126,14 +126,23 @@ def disconnect_shop(certificate: Certificate):
     response.update(data)
     return response
 
-@app.get('/fetch-from-instagram')
-def sync_shop(instagram_username: str):
+@app.post('/fetch-from-instagram', response_model=dict)
+def sync_shop(certificate: Certificate):
+    collection = db['clients']
+    query_find = {
+        "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key}
+    user = collection.find_one(query_find)
+    if not user:
+        return {'status': 'error', 'message': 'Client not found'}
     message_dict = {
-        "instagram_username": instagram_username
+        "instagram_username": certificate.instagram_username
     }
     message_json = json.dumps(message_dict).encode('utf-8')
     kafka_service.kafka_producer().send(TOPIC_FETCH_FROM_INSTAGRAM, message_json)
-    return {'status': 'success', 'message': 'The sync process has started'}
+    data = {key: user[key] for key in user if key != "_id"}
+    response = {'status': 'success', 'success': True, 'message': 'The sync process has started'}
+    response.update(data)
+    return response
 
 @app.post('/update-client-website')
 def update_client_website(update_request: updateWebSiteRequest):
