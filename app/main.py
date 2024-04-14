@@ -74,7 +74,9 @@ def register_shop(shop: Shop):
             print("Inserting to mongodb", shop.instagram_username)
             insert_data = shop.__dict__
             collection.insert_one(insert_data)
-            data = insert_data
+            data = collection.find_one(
+                {"instagram_username": shop.instagram_username})
+            data = {key: data[key] for key in data if key != "_id"}
         else:
             message = 'Shop updated successfully'
             print("Updating to mongodb", shop.instagram_username)
