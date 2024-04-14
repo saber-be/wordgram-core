@@ -106,6 +106,7 @@ logging.info("Starting consumer...")
 try:
     for message in consumer:
         # json parse pessage into dict 
+        logging.info("Message received:\n" + message.value.decode('utf-8'))
         message_dict = json.loads(message.value.decode('utf-8'))
         instagram_username = message_dict['instagram_username']
         sync_shop(instagram_username)

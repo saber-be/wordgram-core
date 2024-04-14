@@ -32,7 +32,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python -m app.services.update_wp_clients.py
+    command: python -m app.services.fetch_from_instagram.py
     
     environment:
       - DEBUG=${DEBUG}
