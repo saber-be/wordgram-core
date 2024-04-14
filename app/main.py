@@ -133,7 +133,7 @@ def sync_shop(certificate: Certificate):
         "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key}
     user = collection.find_one(query_find)
     if not user:
-        return {'status': 'error', 'message': 'Client not found'}
+        return {'status': 'error','success': False, 'message': 'Client not found'}
     message_dict = {
         "instagram_username": certificate.instagram_username
     }
