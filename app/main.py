@@ -46,7 +46,7 @@ kafka_service = KafkaService()
 
 
 @app.get("/")
-def read_root():
+async def read_root():
     return {"Hello": os.environ.get('MONGO_HOST')}
 
 # Add CORS middleware to allow OPTIONS request
@@ -59,7 +59,7 @@ app.add_middleware(
 
 
 @app.post('/register-shop', response_model=dict)
-def register_shop(shop: Shop):
+async def register_shop(shop: Shop):
     if shop.shop_name == "" or shop.platform == "" \
             or shop.platform_url == "" or shop.redirect_url == "" \
             or shop.product_webhook_url == "" or shop.order_webhook_url == "" \
@@ -99,7 +99,7 @@ def register_shop(shop: Shop):
 
 
 @app.post('/is-connect', response_model=dict)
-def is_connect(certificate: Certificate):
+async def is_connect(certificate: Certificate):
     collection = db['clients']
     query_find = {
         "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key, "disconnect_at": None}
@@ -113,7 +113,7 @@ def is_connect(certificate: Certificate):
     return response
 
 @app.post('/disconnect-shop', response_model=dict)
-def disconnect_shop(certificate: Certificate):
+async def disconnect_shop(certificate: Certificate):
     collection = db['clients']
     query_find = {
         "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key}
@@ -128,7 +128,7 @@ def disconnect_shop(certificate: Certificate):
     return response
 
 @app.post('/fetch-from-instagram', response_model=dict)
-def sync_shop(certificate: Certificate):
+async def sync_shop(certificate: Certificate):
     collection = db['clients']
     query_find = {
         "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key}
@@ -146,7 +146,7 @@ def sync_shop(certificate: Certificate):
     return response
 
 @app.post('/update-client-website')
-def update_client_website(update_request: updateWebSiteRequest):
+async def update_client_website(update_request: updateWebSiteRequest):
     # http://localhost:81/update-client-website?instagram_username=mosakbary
     # get posts from mongodb and update the client's website
     posts_collection = db['posts']
@@ -170,12 +170,13 @@ def update_client_website(update_request: updateWebSiteRequest):
         if update_request.force_update == False or ('published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]):
             continue
         json_data = PostReaderService.instaToWordGramMapper(post, update_request)
+        print(json_data)
         products.append(json_data)
-        re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
-        if re.status_code == 200:
-            posts_collection.update_one(
-                {"instagram_id": post["instagram_id"]}, {"$set": {"published_at": datetime.datetime.now()}})
-        print(re.text)
+        # re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
+        # if re.status_code == 200:
+        #     posts_collection.update_one(
+        #         {"instagram_id": post["instagram_id"]}, {"$set": {"published_at": datetime.datetime.now()}})
+        # print(re.text)
         
         
     return {'status': 'success', 'message': 'Client website updated successfully'}
@@ -184,7 +185,7 @@ def update_client_website(update_request: updateWebSiteRequest):
 
 
 @app.get('/fetch-all-posts')
-def fetch_all_posts_from_all_accounts():
+async def fetch_all_posts_from_all_accounts():
     # http://localhost:81/fetch-all-posts
     # fetch all posts from all client accounts
     collection = db['clients']
