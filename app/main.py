@@ -1,6 +1,6 @@
 import json
 import requests
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 import datetime
 from pymongo.errors import ServerSelectionTimeoutError
 import pickle
@@ -17,6 +17,7 @@ from app.api import log
 from app.services.log_service import MongoHandler , FileHandler
 from app.services.post_reader_service import PostReaderService
 from app.services.kafka_service import KafkaService, TOPIC_FETCH_FROM_INSTAGRAM
+from app.services.proxy_service import ProxyService
 from fastapi.middleware.cors import CORSMiddleware
 import secrets
 
@@ -192,12 +193,24 @@ def fetch_all_posts_from_all_accounts():
         sync_shop(client["instagram_username"])
     return {'status': 'success', 'message': 'All posts fetched successfully'}
 
-@app.post("/produce/")
-def produce_message(message: str):
+
+@app.get("/proxy")
+async def get_image(
+    image_url: str = Query(..., description="URL of the image to fetch", example="https%3A//scontent.cdninstagram.com/v/t51.2885-19/358763655_137701106016278_1548070312046039900_n.jpg%3Fstp%3Ddst-jpg_s150x150%26_nc_ht%3Dscontent.cdninstagram.com%26_nc_cat%3D102%26_nc_ohc%3D13tV_wm2HJwAb7NwxQ1%26edm%3DAPs17CUBAAAA%26ccb%3D7-5%26oh%3D00_AfDRRQLYHbeo2Ct8Kdt44FS2Eo3dqC7W_cXQ8n9J-5Dk7w%26oe%3D6625D76D%26_nc_sid%3D10d13b")
+):
+    """
+    Fetches an image from the given URL.
+
+    Args:
+        image_url (str): URL of the image to fetch.
+
+    Returns:
+        bytes: The image data.
+
+    Raises:
+        HTTPException: If there is an error fetching the image.
+    """
     try:
-        producer = kafka_service.kafka_producer()
-        producer.send(KAFKA_TOPIC, message.encode('utf-8'))
-        producer.flush()
-        return {"status": "success", "message": "Message sent successfully"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to produce message: {e}")
+        return ProxyService.fetch_image(image_url)
+    except requests.RequestException as e:
+        raise HTTPException(status_code=400, detail=str(e))

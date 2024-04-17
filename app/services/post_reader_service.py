@@ -1,6 +1,6 @@
 import re
 from app.models.updateWebSiteRequest import updateWebSiteRequest
-
+from app.services.proxy_service import ProxyService
 
 class PostReaderService:
     @staticmethod
@@ -38,11 +38,13 @@ class PostReaderService:
             wordGramPost["Images"] = []
             thumbnail = instaPost["thumbnail_url"]
             if (thumbnail):
-                wordGramPost["Images"].append({"url": thumbnail})
+                image_url = ProxyService.get_bypass_url(thumbnail)
+                wordGramPost["Images"].append({"url": image_url})
 
             images = instaPost["resources"]
             for image in images:
-                wordGramPost["Images"].append({"url": image["thumbnail_url"]})
+                image_url = ProxyService.get_bypass_url(image["thumbnail_url"])
+                wordGramPost["Images"].append({"url": image_url})
 
         return wordGramPost
 
