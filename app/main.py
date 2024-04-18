@@ -144,14 +144,6 @@ async def sync_shop(update_request: updateWebSiteRequest):
     response.update(data)
     return response
 
-@app.post('/update-client-website')
-async def update_client_website(update_request: updateWebSiteRequest):
-    message_json = json.dumps(update_request.model_dump()).encode('utf-8')
-    kafka_service.kafka_producer().send(TOPIC_WP_UPDATER, message_json)
-    return {'status': 'success', 'message': 'Update request sent successfully'}
-    
-
-
 
 @app.get('/fetch-all-posts')
 async def fetch_all_posts_from_all_accounts():
