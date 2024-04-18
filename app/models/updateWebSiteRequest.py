@@ -5,6 +5,8 @@ from pydantic import BaseModel
 class updateWebSiteRequest(BaseModel):
     instagram_username: str
     SUK: Optional[str] = None
+    api_key: str
+    state: str
     update_price: Optional[bool] = True
     update_title: Optional[bool] = True
     update_quality: Optional[bool] = True
@@ -19,6 +21,8 @@ class updateWebSiteRequest(BaseModel):
             "example": {
                 "instagram_username": "my_shop",
                 "SUK": "123456",
+                "api_key": "1ds2fev6r5gv",
+                "state": "16513206",
                 "update_price": True,
                 "update_title": True,
                 "update_quality": True,

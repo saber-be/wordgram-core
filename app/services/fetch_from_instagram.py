@@ -7,7 +7,7 @@ import datetime
 import pydantic_core
 from pymongo import MongoClient
 from instagrapi import Client
-from app.services.kafka_service import KafkaService, TOPIC_FETCH_FROM_INSTAGRAM
+from app.services.kafka_service import KafkaService
 from app.services.log_service import MongoHandler , FileHandler
 
 logging.basicConfig(level=logging.INFO)
@@ -24,7 +24,8 @@ logging.getLogger().addHandler(file_handler)
 kafka_service = KafkaService()
 client = MongoClient(os.environ.get('MONGO_HOST'), int(os.environ.get('MONGO_PORT')))
 db = client[os.environ.get('MONGO_DB')]
-
+TOPIC_WP_UPDATER = os.getenv('TOPIC_WP_UPDATER')
+TOPIC_FETCH_FROM_INSTAGRAM = os.getenv('TOPIC_FETCH_FROM_INSTAGRAM')
 def sync_shop(instagram_username: str):
     # http://localhost:81/sync-shop?instagram_username=mosakbary
     # http://localhost:81/fetch-from-instagram?instagram_username=59378186213
@@ -110,6 +111,7 @@ try:
         message_dict = json.loads(message.value.decode('utf-8'))
         instagram_username = message_dict['instagram_username']
         sync_shop(instagram_username)
+        kafka_service.kafka_producer().send(TOPIC_WP_UPDATER, message)
 except json.JSONDecodeError as e:
     logging.error("Error parsing message: " + str(e))
 except KeyboardInterrupt:

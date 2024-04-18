@@ -16,7 +16,7 @@ from app.models.updateWebSiteRequest import updateWebSiteRequest
 from app.api import log
 from app.services.log_service import MongoHandler , FileHandler
 from app.services.post_reader_service import PostReaderService
-from app.services.kafka_service import KafkaService, TOPIC_FETCH_FROM_INSTAGRAM
+from app.services.kafka_service import KafkaService
 from app.services.proxy_service import ProxyService
 from fastapi.middleware.cors import CORSMiddleware
 import secrets
@@ -40,7 +40,8 @@ logging.getLogger().addHandler(mongo_handler)
 logging.getLogger().addHandler(file_handler)
 
 kafka_service = KafkaService()
-WP_UPDATER_TOPIC = os.getenv('WP_UPDATER_TOPIC')
+TOPIC_WP_UPDATER = os.getenv('TOPIC_WP_UPDATER')
+TOPIC_FETCH_FROM_INSTAGRAM = os.getenv('TOPIC_FETCH_FROM_INSTAGRAM')
 
 
 
@@ -128,17 +129,15 @@ async def disconnect_shop(certificate: Certificate):
     return response
 
 @app.post('/fetch-from-instagram', response_model=dict)
-async def sync_shop(certificate: Certificate):
+async def sync_shop(update_request: updateWebSiteRequest):
     collection = db['clients']
     query_find = {
-        "instagram_username": certificate.instagram_username, "state": certificate.state, "api_key": certificate.api_key}
+        "instagram_username": update_request.instagram_username, "state": update_request.state, "api_key": update_request.api_key}
     user = collection.find_one(query_find)
     if not user:
         return {'status': 'error','success': False, 'message': 'Client not found'}
-    message_dict = {
-        "instagram_username": certificate.instagram_username
-    }
-    message_json = json.dumps(message_dict).encode('utf-8')
+
+    message_json = json.dumps(update_request.model_dump()).encode('utf-8')
     kafka_service.kafka_producer().send(TOPIC_FETCH_FROM_INSTAGRAM, message_json)
     data = {key: user[key] for key in user if key != "_id"}
     response = {'status': 'success', 'success': True, 'message': 'The sync process has started'}
@@ -148,7 +147,7 @@ async def sync_shop(certificate: Certificate):
 @app.post('/update-client-website')
 async def update_client_website(update_request: updateWebSiteRequest):
     message_json = json.dumps(update_request.model_dump()).encode('utf-8')
-    kafka_service.kafka_producer().send(WP_UPDATER_TOPIC, message_json)
+    kafka_service.kafka_producer().send(TOPIC_WP_UPDATER, message_json)
     return {'status': 'success', 'message': 'Update request sent successfully'}
     
 

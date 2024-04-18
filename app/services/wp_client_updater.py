@@ -19,7 +19,7 @@ logging.getLogger().addHandler(mongo_handler)
 logging.getLogger().addHandler(file_handler)
 
 kafka_service = KafkaService()
-WP_UPDATER_TOPIC = os.getenv('WP_UPDATER_TOPIC')
+TOPIC_WP_UPDATER = os.getenv('TOPIC_WP_UPDATER')
 client = MongoClient(os.environ.get('MONGO_HOST'), int(os.environ.get('MONGO_PORT')))
 db = client[os.environ.get('MONGO_DB')]
 
@@ -62,7 +62,7 @@ def update_client_website(update_request: updateWebSiteRequest):
 
 while True:
     try:
-        consumer = kafka_service.kafka_consumer(WP_UPDATER_TOPIC)
+        consumer = kafka_service.kafka_consumer(TOPIC_WP_UPDATER)
         break
     except:
         logging.error("Kafka consumer failed to connect. Retrying...")

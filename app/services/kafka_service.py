@@ -1,8 +1,6 @@
 from kafka import KafkaProducer, KafkaConsumer
 # Kafka configuration
 KAFKA_BOOTSTRAP_SERVERS = 'kafka:9092'
-KAFKA_TOPIC = 'test_topic'
-TOPIC_FETCH_FROM_INSTAGRAM = 'fetch_from_instagram'
 
 
 class KafkaService:
