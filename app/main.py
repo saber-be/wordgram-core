@@ -40,7 +40,7 @@ logging.getLogger().addHandler(mongo_handler)
 logging.getLogger().addHandler(file_handler)
 
 kafka_service = KafkaService()
-
+WP_UPDATER_TOPIC = os.getenv('WP_UPDATER_TOPIC')
 
 
 
@@ -147,39 +147,9 @@ async def sync_shop(certificate: Certificate):
 
 @app.post('/update-client-website')
 async def update_client_website(update_request: updateWebSiteRequest):
-    # http://localhost:81/update-client-website?instagram_username=mosakbary
-    # get posts from mongodb and update the client's website
-    posts_collection = db['posts']
-    client_collection = db['clients']
-    instagram_username = update_request.instagram_username
-    client = client_collection.find_one({"instagram_username": instagram_username, "disconnect_at": None})
-    if client is None:
-        return {'status': 'error', 'message': 'Client not found'}
-    post_query = {"user.username": instagram_username}
-    if update_request.SUK is not None:
-        post_query["code"] = update_request.SUK
-    posts = posts_collection.find(post_query)
-    # loop through the posts and update the client's website
-    print("Updating client website1")
-    products = []
-    for post in posts:
-        print("Updating client website")       
-        #  send request to the client's website
-        url = client["product_webhook_url"]
-        # url = "http://localhost:8082/wp-admin/admin-ajax.php?action=wordgram-product-hook"
-        if update_request.force_update == False or ('published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]):
-            continue
-        json_data = PostReaderService.instaToWordGramMapper(post, update_request)
-        print(json_data)
-        products.append(json_data)
-        # re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
-        # if re.status_code == 200:
-        #     posts_collection.update_one(
-        #         {"instagram_id": post["instagram_id"]}, {"$set": {"published_at": datetime.datetime.now()}})
-        # print(re.text)
-        
-        
-    return {'status': 'success', 'message': 'Client website updated successfully'}
+    message_json = json.dumps(update_request.model_dump()).encode('utf-8')
+    kafka_service.kafka_producer().send(WP_UPDATER_TOPIC, message_json)
+    return {'status': 'success', 'message': 'Update request sent successfully'}
     
 
 

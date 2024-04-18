@@ -56,6 +56,33 @@ services:
       - ./logs/docker-consumer-1:/var/log
     networks:
       - wordgram-network
+  wp-updater:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -m app.services.wp_client_updater.py
+    environment:
+      - DEBUG=${DEBUG}
+      - WP_UPDATER_TOPIC=${WP_UPDATER_TOPIC}
+      - ACCOUNT_USERNAME=${ACCOUNT_USERNAME}
+      - ACCOUNT_PASSWORD=${ACCOUNT_PASSWORD}
+      - MONGO_DB=${MONGO_DB}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+    depends_on:
+      - mongo
+      - kafka
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "10"
+    volumes:
+      - ./app:/code/app
+      - ./logs/wp-updater:/code/logs
+      - ./logs/docker-wp-updater:/var/log
+    networks:
+      - wordgram-network
   mongo:
     image: mongo
     ports:
