@@ -39,10 +39,10 @@ def sync_shop(instagram_username: str):
         with open('cl.pkl', 'rb') as f:
             cl = pickle.load(f)
     except:
-        print("Logging in...")
+        logging.info("Logging in...")
         cl = Client()
         cl.login(ACCOUNT_USERNAME, ACCOUNT_PASSWORD)
-        print("Logged in")
+        logging.info("Logged in")
         with open('cl.pkl', 'wb') as f:
             pickle.dump(cl, f)
     
@@ -50,6 +50,10 @@ def sync_shop(instagram_username: str):
     # if user_id is not a number, get the user_id from the username
     if not user_id.isdigit():
         user_id = cl.user_id_from_username(instagram_username)
+        # store in clinets collection
+        logging.info("Updating user_id in clients collection for " + instagram_username + " to " + user_id )
+        db['clients'].update_one({"instagram_username": instagram_username}, {"$set": {"instagram_user_id": user_id}})
+
     medias = cl.user_medias(user_id, 200)
     # store medias in mongodb
     for media in medias:
@@ -59,7 +63,7 @@ def sync_shop(instagram_username: str):
         # loop through the json_data and convert pydontic objects to string
         for key in json_data:
             if isinstance(json_data[key], pydantic_core._pydantic_core.Url):
-                print("URL found")
+                logging.info("URL found")
                 json_data[key] = str(json_data[key])
         #  if instance of URL
         # set instagram_id unique in the collection
@@ -68,15 +72,15 @@ def sync_shop(instagram_username: str):
         old_data = collection.find_one({"instagram_id": json_data["instagram_id"]})
         # insert to mongodb
         if old_data is None:
-            print("Inserting to mongodb")
+            logging.info("Inserting to mongodb")
             json_data["created_at"] = datetime.datetime.now()
             json_data["published_at"] = None
             try:
                 collection.insert_one(json_data)
-            except:
-                print("Error inserting to mongodb")
+            except Exception as e:
+                logging.error("Error inserting to mongodb: " + str(e))
         else:
-            print("Updating to mongodb")
+            logging.info("Updating to mongodb")
             # update the document
             excepted_keys = ['created_at', 'updated_at', 'taken_at', 'video_url', 'image_versions2', 'user']
             compared_keys = ['caption_text']
@@ -109,9 +113,18 @@ try:
         # json parse pessage into dict 
         logging.info("Message received:\n" + message.value.decode('utf-8'))
         message_dict = json.loads(message.value.decode('utf-8'))
-        instagram_username = message_dict['instagram_username']
-        sync_shop(instagram_username)
-        producer = kafka_service.kafka_producer().send(TOPIC_WP_UPDATER, message)
+        instagram_username = message_dict['instagram_username'] if 'instagram_username' in message_dict else None
+        if instagram_username is None:
+            logging.error("Instagram username is required")
+            continue
+        sync_instagram = message_dict['sync_instagram'] if 'sync_instagram' in message_dict else False
+        if(sync_instagram):
+            instagrm_user_id = message_dict['instagram_user_id'] if 'instagram_user_id' in message_dict else instagram_username
+            sync_shop(instagrm_user_id)
+
+        new_message = json.dumps(message_dict).encode('utf-8')
+        producer = kafka_service.kafka_producer()
+        producer.send(TOPIC_WP_UPDATER, new_message)
         producer.flush()
 except json.JSONDecodeError as e:
     logging.error("Error parsing message: " + str(e))

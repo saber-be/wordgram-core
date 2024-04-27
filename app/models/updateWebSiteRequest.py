@@ -14,7 +14,9 @@ class updateWebSiteRequest(BaseModel):
     update_tags: Optional[bool] = True
     update_images: Optional[bool] = True
     force_update: Optional[bool] = False
+    sync_instagram: Optional[bool] = True
     params: Optional[dict] = None
+    instagram_user_id: Optional[str] = None
 
     class Config:
         schema_extra = {
@@ -29,6 +31,6 @@ class updateWebSiteRequest(BaseModel):
                 "update_description": True,
                 "update_tags": True,
                 "force_update": False,
-                "params": {"key": "value"},
+                "sync_instagram": True,
             }
         }

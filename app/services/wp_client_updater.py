@@ -1,8 +1,10 @@
+import datetime
 import json
 import logging
 import time
 import os
 from pymongo import MongoClient
+import requests
 from app.services.kafka_service import KafkaService
 from app.services.post_reader_service import PostReaderService
 from app.services.log_service import MongoHandler , FileHandler
@@ -29,34 +31,34 @@ def update_client_website(update_request: updateWebSiteRequest):
     # get posts from mongodb and update the client's website
     posts_collection = db['posts']
     client_collection = db['clients']
-    instagram_username = update_request.instagram_username
+    instagram_username = update_request.instagram_username.lower()
     client = client_collection.find_one({"instagram_username": instagram_username, "disconnect_at": None})
     if client is None:
+        logging.error("Client not found for "+instagram_username+" or client is disconnected")
         return {'status': 'error', 'message': 'Client not found'}
     post_query = {"user.username": instagram_username}
     if update_request.SUK is not None:
         post_query["code"] = update_request.SUK
     posts = posts_collection.find(post_query)
     # loop through the posts and update the client's website
-    print("Updating client website1")
-    products = []
+    logging.info("Updating client "+instagram_username+" website")
     for post in posts:
-        print("Updating client website")       
+        logging.info("Updating client website")       
         #  send request to the client's website
         url = client["product_webhook_url"]
         # url = "http://localhost:8082/wp-admin/admin-ajax.php?action=wordgram-product-hook"
-        if update_request.force_update == False or ('published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]):
+        if update_request.force_update == False and  ('published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]):
             continue
         json_data = PostReaderService.instaToWordGramMapper(post, update_request)
-        print(json_data)
-        products.append(json_data)
-        # re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
-        # if re.status_code == 200:
-        #     posts_collection.update_one(
-        #         {"instagram_id": post["instagram_id"]}, {"$set": {"published_at": datetime.datetime.now()}})
-        # print(re.text)
-        
-        
+        logging.info(json_data)
+       
+        re = requests.post(url, json={"action": "addProduct", "products": [json_data]})
+        if re.status_code == 200:
+            posts_collection.update_one(
+                {"instagram_id": post["instagram_id"]}, {"$set": {"published_at": datetime.datetime.now()}})
+        logging.info(re.text)
+    
+    logging.info("Client website updated successfully")
     return {'status': 'success', 'message': 'Client website updated successfully'}
 
 
@@ -76,8 +78,7 @@ try:
         logging.info("Message received:\n" + message.value.decode('utf-8'))
         message_dict = json.loads(message.value.decode('utf-8'))
         update_request_obj = updateWebSiteRequest(**message_dict)
-        instagram_username = message_dict['instagram_username']
-        update_client_website(instagram_username)
+        update_client_website(update_request_obj)
 except json.JSONDecodeError as e:
     logging.error("Error parsing message: " + str(e))
 except KeyboardInterrupt:

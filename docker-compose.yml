@@ -46,6 +46,7 @@ services:
       - MONGO_DB=${MONGO_DB}
       - MONGO_HOST=${MONGO_HOST}
       - MONGO_PORT=${MONGO_PORT}
+      - BASE_URL=${BASE_URL}
     depends_on:
       - mongo
       - kafka
@@ -74,6 +75,7 @@ services:
       - MONGO_DB=${MONGO_DB}
       - MONGO_HOST=${MONGO_HOST}
       - MONGO_PORT=${MONGO_PORT}
+      - BASE_URL=${BASE_URL}
     depends_on:
       - mongo
       - kafka

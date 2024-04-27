@@ -132,12 +132,15 @@ async def disconnect_shop(certificate: Certificate):
 async def sync_shop(update_request: updateWebSiteRequest):
     collection = db['clients']
     query_find = {
-        "instagram_username": update_request.instagram_username, "state": update_request.state, "api_key": update_request.api_key}
+        "instagram_username": update_request.instagram_username.lower(), "state": update_request.state, "api_key": update_request.api_key}
     user = collection.find_one(query_find)
     if not user:
         return {'status': 'error','success': False, 'message': 'Client not found'}
+    message_dict = update_request.__dict__
+    if "instagram_user_id" in user:
+        message_dict["instagram_user_id"] = user["instagram_user_id"]
 
-    message_json = json.dumps( update_request.__dict__).encode('utf-8')
+    message_json = json.dumps( message_dict).encode('utf-8')
     producer = kafka_service.kafka_producer()
     producer.send(TOPIC_FETCH_FROM_INSTAGRAM, message_json)
     producer.flush()
