@@ -111,7 +111,8 @@ try:
         message_dict = json.loads(message.value.decode('utf-8'))
         instagram_username = message_dict['instagram_username']
         sync_shop(instagram_username)
-        kafka_service.kafka_producer().send(TOPIC_WP_UPDATER, message)
+        producer = kafka_service.kafka_producer().send(TOPIC_WP_UPDATER, message)
+        producer.flush()
 except json.JSONDecodeError as e:
     logging.error("Error parsing message: " + str(e))
 except KeyboardInterrupt:

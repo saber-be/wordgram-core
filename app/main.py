@@ -137,8 +137,10 @@ async def sync_shop(update_request: updateWebSiteRequest):
     if not user:
         return {'status': 'error','success': False, 'message': 'Client not found'}
 
-    message_json = json.dumps(update_request.model_dump()).encode('utf-8')
-    kafka_service.kafka_producer().send(TOPIC_FETCH_FROM_INSTAGRAM, message_json)
+    message_json = json.dumps( update_request.__dict__).encode('utf-8')
+    producer = kafka_service.kafka_producer()
+    producer.send(TOPIC_FETCH_FROM_INSTAGRAM, message_json)
+    producer.flush()
     data = {key: user[key] for key in user if key != "_id"}
     response = {'status': 'success', 'success': True, 'message': 'The sync process has started'}
     response.update(data)
