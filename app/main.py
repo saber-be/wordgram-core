@@ -163,7 +163,7 @@ async def fetch_all_posts_from_all_accounts():
 
 @app.get("/proxy")
 async def get_image(
-    image_url: str = Query(..., description="URL of the image to fetch", example="https%3A//scontent.cdninstagram.com/v/t51.2885-19/358763655_137701106016278_1548070312046039900_n.jpg%3Fstp%3Ddst-jpg_s150x150%26_nc_ht%3Dscontent.cdninstagram.com%26_nc_cat%3D102%26_nc_ohc%3D13tV_wm2HJwAb7NwxQ1%26edm%3DAPs17CUBAAAA%26ccb%3D7-5%26oh%3D00_AfDRRQLYHbeo2Ct8Kdt44FS2Eo3dqC7W_cXQ8n9J-5Dk7w%26oe%3D6625D76D%26_nc_sid%3D10d13b")
+    url: str = Query(..., description="URL of the image to fetch", example="https%3A//scontent.cdninstagram.com/v/t51.2885-19/358763655_137701106016278_1548070312046039900_n.jpg%3Fstp%3Ddst-jpg_s150x150%26_nc_ht%3Dscontent.cdninstagram.com%26_nc_cat%3D102%26_nc_ohc%3D13tV_wm2HJwAb7NwxQ1%26edm%3DAPs17CUBAAAA%26ccb%3D7-5%26oh%3D00_AfDRRQLYHbeo2Ct8Kdt44FS2Eo3dqC7W_cXQ8n9J-5Dk7w%26oe%3D6625D76D%26_nc_sid%3D10d13b")
 ):
     """
     Fetches an image from the given URL.
@@ -178,6 +178,6 @@ async def get_image(
         HTTPException: If there is an error fetching the image.
     """
     try:
-        return ProxyService.fetch_image(image_url)
+        return ProxyService.fetch_image(url)
     except requests.RequestException as e:
         raise HTTPException(status_code=400, detail=str(e))

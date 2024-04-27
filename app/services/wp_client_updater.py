@@ -56,7 +56,9 @@ def update_client_website(update_request: updateWebSiteRequest):
         if re.status_code == 200:
             posts_collection.update_one(
                 {"instagram_id": post["instagram_id"]}, {"$set": {"published_at": datetime.datetime.now()}})
-        logging.info(re.text)
+            logging.info(re.text)
+        else:
+            logging.error(re.text)
     
     logging.info("Client website updated successfully")
     return {'status': 'success', 'message': 'Client website updated successfully'}

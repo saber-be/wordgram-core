@@ -39,12 +39,12 @@ class PostReaderService:
             thumbnail = instaPost["thumbnail_url"]
             if (thumbnail):
                 image_url = ProxyService.get_bypass_url(thumbnail)
-                wordGramPost["Images"].append({"url": image_url})
+                wordGramPost["Images"].append({"url": thumbnail})
 
             images = instaPost["resources"]
             for image in images:
                 image_url = ProxyService.get_bypass_url(image["thumbnail_url"])
-                wordGramPost["Images"].append({"url": image_url})
+                wordGramPost["Images"].append({"url": image["thumbnail_url"]})
 
         return wordGramPost
 
