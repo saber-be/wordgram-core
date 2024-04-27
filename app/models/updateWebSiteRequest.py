@@ -19,10 +19,10 @@ class updateWebSiteRequest(BaseModel):
     class Config:
         schema_extra = {
             "example": {
-                "instagram_username": "my_shop",
+                "instagram_username": "Moonlandir",
                 "SUK": "123456",
-                "api_key": "1ds2fev6r5gv",
-                "state": "16513206",
+                "api_key": "8240f2baf3884fae0972d2cdac3051ea",
+                "state": "1520066218a441744b",
                 "update_price": True,
                 "update_title": True,
                 "update_quality": True,
