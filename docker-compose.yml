@@ -31,7 +31,7 @@ services:
       - ./logs/docker:/var/log
     networks:
       - wordgram-network
-  consumer-1:
+  instagram-fetcher-1:
     build:
       context: .
       dockerfile: Dockerfile
@@ -56,8 +56,8 @@ services:
         max-file: "10"
     volumes:
       - ./app:/code/app
-      - ./logs/consumer-1:/code/logs
-      - ./logs/docker-consumer-1:/var/log
+      - ./logs/instagram-fetcher-1:/code/logs
+      - ./logs/docker-instagram-fetcher-1:/var/log
     networks:
       - wordgram-network
   wp-updater:
