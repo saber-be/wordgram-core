@@ -13,6 +13,7 @@ class updateWebSiteRequest(BaseModel):
     update_description: Optional[bool] = True
     update_tags: Optional[bool] = True
     update_images: Optional[bool] = True
+    update_all_posts: Optional[bool] = False
     force_update: Optional[bool] = False
     sync_instagram: Optional[bool] = True
     params: Optional[dict] = None
@@ -30,6 +31,8 @@ class updateWebSiteRequest(BaseModel):
                 "update_quality": True,
                 "update_description": True,
                 "update_tags": True,
+                "update_images": True,
+                "update_all_posts": False,
                 "force_update": False,
                 "sync_instagram": True,
             }
