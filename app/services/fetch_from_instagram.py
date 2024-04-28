@@ -119,7 +119,7 @@ try:
             continue
         sync_instagram = message_dict['sync_instagram'] if 'sync_instagram' in message_dict else False
         if(sync_instagram):
-            instagrm_user_id = message_dict['instagram_user_id'] if 'instagram_user_id' in message_dict else instagram_username
+            instagrm_user_id = message_dict['instagram_user_id'] if 'instagram_user_id' in message_dict and message_dict['instagram_user_id'] else instagram_username
             sync_shop(instagrm_user_id)
 
         new_message = json.dumps(message_dict).encode('utf-8')

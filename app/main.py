@@ -69,6 +69,7 @@ async def register_shop(shop: Shop):
 
     # insert to mongodb
     collection = db['clients']
+    shop.instagram_username = shop.instagram_username.lower()
     try:
         message = 'Shop registered successfully'
         if collection.find_one({"instagram_username": shop.instagram_username}) is None:
@@ -128,9 +129,11 @@ async def disconnect_shop(certificate: Certificate):
     response.update(data)
     return response
 
-@app.post('/fetch-from-instagram', response_model=dict)
+@app.post('/sync-shop', response_model=dict)
 async def sync_shop(update_request: updateWebSiteRequest):
     collection = db['clients']
+    logging.info('Request received to sync shop: ' + update_request.instagram_username)
+    logging.info('Request is: ' + str(update_request))
     query_find = {
         "instagram_username": update_request.instagram_username.lower(), "state": update_request.state, "api_key": update_request.api_key}
     user = collection.find_one(query_find)
