@@ -47,7 +47,8 @@ def update_client_website(update_request: updateWebSiteRequest):
         #  send request to the client's website
         url = client["product_webhook_url"]
         # url = "http://localhost:8082/wp-admin/admin-ajax.php?action=wordgram-product-hook"
-        if (update_request.force_update == False or update_request.update_all_posts == False) and  ('published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]):
+        if (update_request.force_update == False and update_request.update_all_posts == False) and  ('published_at' in post and 'updated_at' in post and post["published_at"] and post["published_at"] >= post["updated_at"]):
+            logging.info("Post " + (post["code"] if "code" in post else post["_id"])+ " is already updated. Skipping...")
             continue
         json_data = PostReaderService.instaToWordGramMapper(post, update_request)
         logging.info(json_data)

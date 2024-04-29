@@ -7,6 +7,8 @@ class PostReaderService:
     def instaToWordGramMapper(instaPost, update_request: updateWebSiteRequest):
         print(instaPost)
         wordGramPost = {}
+        if "code" in instaPost:
+            wordGramPost["SKU"] = instaPost["code"]
         caption = instaPost["caption_text"].split("\n")
         name = caption[0][:50]
         description = instaPost["caption_text"]
