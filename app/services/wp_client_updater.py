@@ -37,8 +37,8 @@ def update_client_website(update_request: updateWebSiteRequest):
         logging.error("Client not found for "+instagram_username+" or client is disconnected")
         return {'status': 'error', 'message': 'Client not found'}
     post_query = {"user.username": instagram_username}
-    if update_request.SUK is not None:
-        post_query["code"] = update_request.SUK
+    if update_request.SKU is not None:
+        post_query["code"] = update_request.SKU
     posts = posts_collection.find(post_query)
     # loop through the posts and update the client's website
     logging.info("Updating client "+instagram_username+" website")

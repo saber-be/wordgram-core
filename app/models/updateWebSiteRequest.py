@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 class updateWebSiteRequest(BaseModel):
     instagram_username: str
-    SUK: Optional[str] = None
+    SKU: Optional[str] = None
     api_key: str
     state: str
     update_price: Optional[bool] = True
@@ -23,7 +23,7 @@ class updateWebSiteRequest(BaseModel):
         schema_extra = {
             "example": {
                 "instagram_username": "Moonlandir",
-                "SUK": "123456",
+                "SKU": "123456",
                 "api_key": "8240f2baf3884fae0972d2cdac3051ea",
                 "state": "1520066218a441744b",
                 "update_price": True,
