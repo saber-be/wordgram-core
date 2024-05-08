@@ -11,12 +11,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      - name: Create known_hosts file if not exists
-        run: touch ~/.ssh/known_hosts
-      - name: Add known hosts
-        run: ssh-keyscan 92.246.138.182 >> ~/.ssh/known_hosts
-      
       - name: Deploy code via SSH
-        run: rsync -rav --delete . root@92.246.138.182:~/wordgram/wordgram-core
+        run: |
+          echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          rsync -rav --delete -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:~/wordgram/wordgram-core
         env:
           DEPLOY_KEY: ${{ secrets.CORE }}
