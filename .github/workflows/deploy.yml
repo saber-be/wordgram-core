@@ -15,11 +15,11 @@ jobs:
         run: |
           install -m 600 -D /dev/null ~/.ssh/id_rsa
           echo "${{ secrets.CORE }}" > ~/.ssh/id_rsa
-          ssh-keyscan -H ${{ secrets.SERVER_HOST }} >> ~/.ssh/known_hosts
+          ssh-keyscan -H 92.246.138.182 >> ~/.ssh/known_hosts
         continue-on-error: true
         
       - name: Deploy code via SSH
-        run: rsync -rav -e "ssh -i ~/.ssh/id_rsa" . root@${{ secrets.SERVER_HOST }}:${{ secrets.PROJECT_DIR }}
+        run: rsync -rav -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:${{ secrets.PROJECT_DIR }}
         continue-on-error: true
       - name: clean up
         run: rm -rf ~/.ssh
