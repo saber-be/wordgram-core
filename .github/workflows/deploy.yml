@@ -18,4 +18,4 @@ jobs:
         ssh-keyscan 92.246.138.182 >> ~/.ssh/known_hosts
         rsync -rav --delete . root@92.246.138.182:~/wordgram/wordgram-core/
       env:
-        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}The error message "Host key verification failed" indicates that the SSH client (in this case, `rsync` using SSH) was not able to verify the identity of the server. This can happen for a few reasons:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
