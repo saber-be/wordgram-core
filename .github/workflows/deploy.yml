@@ -9,15 +9,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-    - name: Set up SSH key
-      uses: webfactory/ssh-agent@v0.5.3
-      with:
-        ssh-private-key: ${{ secrets.CORE }}
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-    - name: Deploy to server
-      run: |
-        ssh root@92.246.138.182 -o StrictHostKeyChecking=no 'cd ~/wordgram/wordgram-core && git pull origin master'
-      env:
-        DEPLOY_KEY: ${{ secrets.CORE }}
+      - name: Install SSH client
+        run: sudo apt-get install openssh-client -y
+
+      - name: Copy SSH private key
+        run: echo "$CORE" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
+
+      - name: Add known hosts
+        run: ssh-keyscan 92.246.138.182 >> ~/.ssh/known_hosts
+
+      - name: Deploy code via SSH
+        run: scp -r ./* root@92.246.138.182:~/wordgram/wordgram-core

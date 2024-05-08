@@ -1,7 +1,6 @@
 import datetime
 import json
 import logging
-from sys import exception
 import time
 import os
 from pymongo import MongoClient

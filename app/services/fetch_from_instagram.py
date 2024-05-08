@@ -102,8 +102,9 @@ while True:
     try:
         consumer = kafka_service.kafka_consumer(TOPIC_FETCH_FROM_INSTAGRAM)
         break
-    except:
+    except Exception as e:
         logging.error("Kafka consumer failed to connect. Retrying...")
+        logging.error(str(e))
         # Wait for 5 seconds before retrying
         time.sleep(5)
 # Continuously listen for messages
