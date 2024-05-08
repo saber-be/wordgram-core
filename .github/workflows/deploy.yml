@@ -1,0 +1,21 @@
+name: Deploy to server
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event.pull_request.merged == true
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Deploy to server
+      run: |
+        rsync -rav --delete . root@92.246.138.182:~/wordgram/wordgram-core/
+      env:
+        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}

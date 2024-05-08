@@ -1,6 +1,7 @@
 import datetime
 import json
 import logging
+from sys import exception
 import time
 import os
 from pymongo import MongoClient
@@ -69,8 +70,9 @@ while True:
     try:
         consumer = kafka_service.kafka_consumer(TOPIC_WP_UPDATER)
         break
-    except:
+    except Exception as e:
         logging.error("Kafka consumer failed to connect. Retrying...")
+        logging.error(str(e))
         # Wait for 5 seconds before retrying
         time.sleep(5)
 # Continuously listen for messages
