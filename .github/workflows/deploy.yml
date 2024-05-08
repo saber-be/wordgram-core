@@ -19,7 +19,7 @@ jobs:
         continue-on-error: true
         
       - name: Deploy code via SSH
-        run: rsync -rav -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:${{ secrets.PROJECT_DIR }}
+        run: rsync -rav -e "ssh -i ~/.ssh/id_rsa" . root@922.246.138.182:${{ secrets.PROJECT_DIR }}
         continue-on-error: true
       - name: clean up
         run: rm -rf ~/.ssh
@@ -27,7 +27,7 @@ jobs:
 
       - name: Send result to webhook
         run: |
-          if [ ${{ job.status }} == 'success' ]; then
+          if [ "${{ failure() }}" == 'true'  ]; then
             curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment status Success"}' "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020"
           else
             curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment status Failed"}' "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020"
