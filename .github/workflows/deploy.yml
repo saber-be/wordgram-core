@@ -13,9 +13,14 @@ jobs:
         uses: actions/checkout@v2
       - name: Deploy code via SSH
         run: |
-          mkdir -p ~/.ssh
-          # echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa
-          # chmod 600 ~/.ssh/id_rsa
-          # rsync -rav --delete -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:~/wordgram/wordgram-core
-        env:
-          DEPLOY_KEY: ${{ secrets.CORE }}
+          install -m 600 /dev/null ~/.ssh/id_rsa
+          echo "${{ secrets.CORE }}" > ~/.ssh/id_rsa
+          ssh-keyscan -H 92.246.138.182 >> ~/.ssh/known_hosts
+          
+      - name: Deploy code via SSH
+        run: rsync -rav --delete -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:~/wordgram/wordgram-core
+      - name: clean up
+        run: rm -rf ~/.ssh
+
+        
+
