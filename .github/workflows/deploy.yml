@@ -25,10 +25,6 @@ jobs:
         run: rsync -rav -e "ssh -i ~/.ssh/id_rsa" . root@${{secrets.SERVER_HOST}}:${{ secrets.PROJECT_DIR }}
         continue-on-error: true
 
-      - name: clean up
-        run: rm -rf ~/.ssh
-        continue-on-error: true
-
       - name: Send fail to webhook
         run: |
           echo "${{ steps.setup_ssh.outcome }} ${{ steps.deploy_code.outcome }}"
@@ -39,3 +35,5 @@ jobs:
             echo "Deployment status Success"
             curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment status Success"}' "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020"
           fi
+      - name: clean up
+        run: rm -rf ~/.ssh
