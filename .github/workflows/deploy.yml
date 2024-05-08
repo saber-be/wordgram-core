@@ -30,14 +30,12 @@ jobs:
         continue-on-error: true
 
       - name: Send fail to webhook
-        if: ${{ steps.setup_ssh.outcome }} == 'failure' || ${{ steps.deploy_code.outcome }} == 'failure'
         run: |
           echo "${{ steps.setup_ssh.outcome }} ${{ steps.deploy_code.outcome }}"
-          curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment status Failed"}' "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020"
-         
-      - name: Send success to webhook
-        if: ${{ steps.setup_ssh.outcome }} != 'failure' && ${{ steps.deploy_code.outcome }} != 'failure'
-        run: |
-          echo "${{ steps.setup_ssh.outcome }} ${{ steps.deploy_code.outcome }}"
-          curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment status Success"}' "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020"
-         
+          if [ ${{ steps.setup_ssh.outcome }} == 'failure' ] || [ ${{ steps.deploy_code.outcome }} == 'failure' ]; then
+            echo "Deployment status Failed"
+            curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment status Failed"}' "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020"
+          else
+            echo "Deployment status Success"
+            curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment status Success"}' "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020"
+          fi
