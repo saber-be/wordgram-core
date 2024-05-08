@@ -26,7 +26,10 @@ jobs:
         continue-on-error: true
 
       - name: Send result to webhook
-        run: |
-          status=$(echo $?)
-          curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020&text=Deployment status: $status"
-        
+      run: |
+        if [ ${{ job.status }} == 'success' ]; then
+          curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020&text=Deployment status: Success"
+        else
+          error_message=$(tail -n 3 $GITHUB_WORKSPACE/.github/workflows/main.yml)  # Adjust as needed
+          curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020&text=Deployment status: $error_message"
+        fi
