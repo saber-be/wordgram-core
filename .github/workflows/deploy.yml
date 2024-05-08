@@ -18,7 +18,7 @@ jobs:
           ssh-keyscan -H ${{secrets.SERVER_HOST}} >> ~/.ssh/known_hosts
           
       - name: Deploy code via SSH
-        run: rsync -rav --delete -e "ssh -i ~/.ssh/id_rsa" . root@${{secrets.SERVER_HOST}}:${{secrets.PROJECT_DIR}}
+        run: rsync -rav -e "ssh -i ~/.ssh/id_rsa" . root@${{secrets.SERVER_HOST}}:${{secrets.PROJECT_DIR}}
       - name: clean up
         run: rm -rf ~/.ssh
 
