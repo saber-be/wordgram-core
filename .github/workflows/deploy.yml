@@ -14,10 +14,6 @@ jobs:
 
     - name: Deploy to server
       run: |
-        mkdir -p ~/.ssh
-        echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa
-        chmod 600 ~/.ssh/id_rsa
-        ssh-keyscan 92.246.138.182 >> ~/.ssh/known_hosts
-        rsync -rav --delete -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:~/wordgram/wordgram-core/
+        ssh root@92.246.138.182 -o StrictHostKeyChecking=no 'cd ~/wordgram/wordgram-core && git pull origin master'
       env:
         DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
