@@ -20,7 +20,7 @@ jobs:
         continue-on-error: true
 
       - name: Deploy code via SSH
-        run: rsync -rav -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:${{ secrets.PROJECT_DIR }}
+        run: rsync -rav -e "ssh -i ~/.ssh/id_rsa" . root@922.246.138.182:${{ secrets.PROJECT_DIR }}
         continue-on-error: true
 
       - name: clean up
