@@ -16,4 +16,4 @@ jobs:
       run: |
         ssh root@92.246.138.182 -o StrictHostKeyChecking=no 'cd ~/wordgram/wordgram-core && git pull origin master'
       env:
-        DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        DEPLOY_KEY: ${{ secrets.CORE }}
