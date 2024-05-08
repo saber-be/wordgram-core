@@ -28,6 +28,5 @@ jobs:
       - name: Send result to webhook
         run: |
           status=$(echo $?)
-          encoded_status=$(urlencode "$status")
-          curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020&text=Deployment status: $encoded_status"
+          curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020&text=Deployment status: $status"
         
