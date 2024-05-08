@@ -22,4 +22,6 @@ jobs:
         run: ssh-keyscan 92.246.138.182 >> ~/.ssh/known_hosts
 
       - name: Deploy code via SSH
-        run: scp -r ./* root@92.246.138.182:~/wordgram/wordgram-core
+        run: rsync -rav --delete . root@92.246.138.182:~/wordgram/wordgram-core
+        env:
+          DEPLOY_KEY: ${{ secrets.CORE }}
