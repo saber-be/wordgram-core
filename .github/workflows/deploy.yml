@@ -23,7 +23,7 @@ jobs:
       - name: Deploy code via SSH
         id: deploy_code
         run: |
-          run: ssh -i ~/.ssh/id_rsa root@${{secrets.SERVER_HOST}}  "cd ${{ secrets.PROJECT_DIR }} && git checkout master && git pull && docker-compose down && docker-compose up -d && exit"
+          run: ssh -i ~/.ssh/id_rsa root@${{secrets.SERVER_HOST}}  "cd ${{ secrets.PROJECT_DIR }} && git checkout master && git pull && docker-compose down && docker-compose up -d"
         continue-on-error: true
 
       - name: Send fail to webhook
