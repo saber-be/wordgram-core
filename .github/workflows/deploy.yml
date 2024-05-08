@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
+      - name: Create known_hosts file if not exists
+        run: touch ~/.ssh/known_hosts
       - name: Add known hosts
         run: ssh-keyscan 92.246.138.182 >> ~/.ssh/known_hosts
       
