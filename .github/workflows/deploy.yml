@@ -14,8 +14,8 @@ jobs:
       - name: Deploy code via SSH
         run: |
           mkdir -p ~/.ssh
-          echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          rsync -rav --delete -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:~/wordgram/wordgram-core
+          # echo "${DEPLOY_KEY}" > ~/.ssh/id_rsa
+          # chmod 600 ~/.ssh/id_rsa
+          # rsync -rav --delete -e "ssh -i ~/.ssh/id_rsa" . root@92.246.138.182:~/wordgram/wordgram-core
         env:
           DEPLOY_KEY: ${{ secrets.CORE }}
