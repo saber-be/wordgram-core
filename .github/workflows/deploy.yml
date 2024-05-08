@@ -12,15 +12,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Install SSH client
-        run: sudo apt-get install openssh-client -y
-
-      - name: Copy SSH private key
-        run: echo "$CORE" > ~/.ssh/id_rsa && chmod 600 ~/.ssh/id_rsa
-
-      - name: Add known hosts
-        run: ssh-keyscan 92.246.138.182 >> ~/.ssh/known_hosts
-
       - name: Deploy code via SSH
         run: rsync -rav --delete . root@92.246.138.182:~/wordgram/wordgram-core
         env:
