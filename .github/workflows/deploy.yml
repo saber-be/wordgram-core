@@ -11,7 +11,9 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-
+      - name: Add known hosts
+        run: ssh-keyscan 92.246.138.182 >> ~/.ssh/known_hosts
+      
       - name: Deploy code via SSH
         run: rsync -rav --delete . root@92.246.138.182:~/wordgram/wordgram-core
         env:
