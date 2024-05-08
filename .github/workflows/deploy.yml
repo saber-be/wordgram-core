@@ -32,4 +32,3 @@ jobs:
           else
             curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment status Failed"}' "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020"
           fi
-        shell: bash
