@@ -31,5 +31,5 @@ jobs:
             curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020&text=Deployment status: Success"
           else
             error_message=$(tail -n 3 $GITHUB_WORKSPACE/.github/workflows/main.yml)  # Adjust as needed
-            curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020&text=Deployment status: $error_message"
+            curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020&text=Deployment status: Failed"
           fi
