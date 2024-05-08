@@ -28,7 +28,7 @@ jobs:
       - name: Send result to webhook
         run: |
           if [ ${{ job.status }} == 'success' ]; then
-            curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020&text=Deployment status: Success"
+            curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020&text=Deployment status Success"
           else
-            curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020&text=Deployment status: Failed"
+            curl -X POST -H "Content-Type: application/json" "https://api.telegram.org/bot1473425387:AAGnGxkdgw-et6J20o3BKBjYum0AMApNsfc/sendMessage?chat_id=-4276022020&text=Deployment status Failed"
           fi
