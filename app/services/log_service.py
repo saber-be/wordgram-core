@@ -1,10 +1,12 @@
 import logging
+import sys
 import traceback
 from pymongo import MongoClient
 from app.models.log import Log
 from typing import List
 import os
 import datetime
+from app.models.filterLog import FilterLog
 
 class LogService:
     def __init__(self):
@@ -24,19 +26,42 @@ class LogService:
         error_log = Log(message=str(error), level="error", error_details=error.__dict__)
         self.save_log(error_log)
 
-    def get_logs(self) -> List[Log]:
-        logs = self.logs_collection.find()
+    def get_logs(self, filter: FilterLog, ) -> List[Log]:
+
+        logs_collection = self.logs_collection
+        sort_by = [(filter.sort_by, 1 if filter.sort_direction == "asc" else -1)]
+        page = filter.page
+        page_size = filter.per_page
+        timestamp_filter = {
+            "$gte": filter.start_timestamp.timestamp(),
+            "$lte": filter.end_timestamp.timestamp()
+        }
+        filter_dict = {}
+        filter_dict["timestamp"] = timestamp_filter
+        if filter.message:
+            filter_dict["message"] = {"$regex": filter.message}
+        if filter.level:
+            filter_dict["level"] = filter.level
+        if filter.service:
+            filter_dict["service"] = filter.service
+        logging.info(filter_dict)
+        logs = logs_collection.find(filter_dict).sort(sort_by).skip((page - 1) * page_size).limit(page_size)
         return [Log(**log) for log in logs]
     
 class MongoHandler(logging.Handler):
     def __init__(self):
         super().__init__()
         self.log_service = LogService()
+        self.service = self.get_process_name()
 
+    def get_process_name(self):
+        return os.path.basename(sys.argv[1])
+    
     def emit(self, record):
         log_entry = {
             "message": self.format(record),
             "level": record.levelname,
+            "service" : self.service,
             "timestamp": record.created
         }
         self.log_service.save_log(log_entry)

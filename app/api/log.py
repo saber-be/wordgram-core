@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, Depends
 from app.models.log import Log
 from app.services.log_service import LogService
-
+from app.models.filterLog import FilterLog
 router = APIRouter()
 log_service = LogService()
 
@@ -11,7 +11,7 @@ async def create_log(log: Log):
     return {"message": "Log created successfully"}
 
 
-@router.get("/logs")
-async def get_logs():
-    logs = log_service.get_logs()
+@router.post("/logs")
+async def get_logs(filter: FilterLog):
+    logs = log_service.get_logs(filter)
     return logs
