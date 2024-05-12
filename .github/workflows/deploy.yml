@@ -25,18 +25,20 @@ jobs:
         run: |
           ssh -i ~/.ssh/id_rsa root@${{secrets.SERVER_HOST}}  "cd ${{ secrets.PROJECT_DIR }} && git checkout master && git pull && docker-compose down && docker-compose up -d && exit"
         continue-on-error: true
+      
+      - name: clean up
+        run: rm -rf ~/.ssh
 
-      - name: Send fail to webhook
+      - name: Send result to Telegram
         run: |
           echo "${{ steps.setup_ssh.outcome }} ${{ steps.deploy_code.outcome }}"
           commit_message=$(git log --format=%B -n 1 ${{ github.sha }})
           if [ ${{ steps.setup_ssh.outcome }} == 'failure' ] || [ ${{ steps.deploy_code.outcome }} == 'failure' ]; then
-            echo "Deployment status Failed: $commit_message"
-            curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment Failed. Commit message: $commit_message"}' "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
+        echo "Deployment status Failed: $commit_message"
+        curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment Failed. Commit message: '"$commit_message"'"}' "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
           else
-            echo "Deployment status Success"
-            curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment finished Successfully. Commit message $commit_message"}' "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
+        echo "Deployment status Success"
+        curl -X POST -H "Content-Type: application/json" -d '{"text": "Deployment finished Successfully. Commit message '"$commit_message"'"}' "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
           fi
 
-      - name: clean up
-        run: rm -rf ~/.ssh
+
