@@ -52,18 +52,25 @@ class PostReaderService:
 
     @staticmethod
     def getPrice(caption):
-        # example : قیمت💰: 448 توما 
-        # output : 448
-        price = 0
-        caption = caption.split("\n")
-        for line in caption:
-            if "قیمت" in line:
-                price = line
-                price = ''.join(filter(str.isdigit, price))
-                if price.isdigit():
-                    price = int(price) * 1000
-                    break
-        return price
+        # Regular expression pattern to match price values
+        price_pattern = r"قیمت\D*([\d,.]+)"
+        # Search for the price pattern in the caption
+        match = re.search(price_pattern, caption)
+        if match:
+            # Extract the matched price
+            price_str = match.group(1)
+            # Remove any non-digit characters except dot and comma
+            price_str = re.sub(r"[^\d,.]", "", price_str)
+            # Convert comma to dot for decimal points
+            price_str = price_str.replace(",", ".")
+            # Convert the price string to float
+            price = float(price_str)
+            # Multiply by 1000 if the price is less than 1000
+            if price < 1000:
+                price *= 1000
+                return price
+            else:
+                return None
 
     @staticmethod
     def getTagsAndCaption(caption):
