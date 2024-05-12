@@ -1,4 +1,5 @@
 import re
+import os
 from app.models.updateWebSiteRequest import updateWebSiteRequest
 from app.services.proxy_service import ProxyService
 
@@ -6,6 +7,7 @@ class PostReaderService:
     @staticmethod
     def instaToWordGramMapper(instaPost, update_request: updateWebSiteRequest):
         print(instaPost)
+        base_url = os.getenv("BASE_URL")
         wordGramPost = {}
         if "code" in instaPost:
             wordGramPost["SKU"] = instaPost["code"]
@@ -40,13 +42,13 @@ class PostReaderService:
             wordGramPost["Images"] = []
             thumbnail = instaPost["thumbnail_url"]
             if (thumbnail):
-                image_url = ProxyService.get_bypass_url(thumbnail)
-                wordGramPost["Images"].append({"url": thumbnail})
+                image_url = ProxyService.get_bypass_url(thumbnail) if "https" in base_url else thumbnail
+                wordGramPost["Images"].append({"url": image_url})
 
             images = instaPost["resources"]
             for image in images:
-                image_url = ProxyService.get_bypass_url(image["thumbnail_url"])
-                wordGramPost["Images"].append({"url": image["thumbnail_url"]})
+                image_url = ProxyService.get_bypass_url(image["thumbnail_url"]) if "https" in base_url else image["thumbnail_url"]
+                wordGramPost["Images"].append({"url": image_url})
 
         return wordGramPost
 
