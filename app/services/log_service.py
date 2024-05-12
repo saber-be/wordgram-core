@@ -55,7 +55,7 @@ class MongoHandler(logging.Handler):
         self.service = self.get_process_name()
 
     def get_process_name(self):
-        return os.path.basename(sys.argv[1])
+        return os.path.basename(sys.argv[0])
     
     def emit(self, record):
         log_entry = {
