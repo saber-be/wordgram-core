@@ -28,6 +28,7 @@ jobs:
       
       - name: clean up
         run: rm -rf ~/.ssh
+        
 
       - name: Send result to Telegram
         run: |
