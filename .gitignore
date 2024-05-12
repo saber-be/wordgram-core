@@ -4,3 +4,4 @@ kafka/*
 *.pyc
 .env
 *.pkl
+.vscode/*
