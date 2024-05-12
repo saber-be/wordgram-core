@@ -7,6 +7,7 @@ services:
     command: uvicorn app.main:app --host 0.0.0.0 --port 80 --reload --log-level debug
     ports:
       - ${PORT}:80
+      - 8443:80
     environment:
       - DEBUG=${DEBUG}
       - TOPIC_WP_UPDATER=${TOPIC_WP_UPDATER}
