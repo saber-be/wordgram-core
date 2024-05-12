@@ -36,10 +36,10 @@ jobs:
           commit_message=$(git log --format=%B -n 1 ${{ github.sha }})
           if [ ${{ steps.setup_ssh.outcome }} == 'failure' ] || [ ${{ steps.deploy_code.outcome }} == 'failure' ]; then
             echo "Deployment status Failed: $commit_message"
-            curl -X POST -H "Content-Type: application/json" -d "{\"text\": \"Deployment Failed.\n$commit_message\"}" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
+            curl -X POST -H "Content-Type: application/json" -d "{\"text\": \"🚫🚫🚫\nDeployment Failed.\n$commit_message\"}" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
           else
             echo "Deployment status Success"
-            curl -X POST -H "Content-Type: application/json" -d "{\"text\": \"Deployment finished Successfully.\n$commit_message\"}" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
+            curl -X POST -H "Content-Type: application/json" -d "{\"text\": \"✅✅✅\nDeployment finished Successfully.\n$commit_message\"}" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
           fi
 
 
