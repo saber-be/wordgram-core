@@ -42,12 +42,12 @@ class PostReaderService:
             wordGramPost["Images"] = []
             thumbnail = instaPost["thumbnail_url"]
             if (thumbnail):
-                image_url = ProxyService.get_bypass_url(thumbnail) if "https" in base_url else thumbnail
+                image_url = ProxyService.get_bypass_url(thumbnail) if "httpss" in base_url else thumbnail
                 wordGramPost["Images"].append({"url": image_url})
 
             images = instaPost["resources"]
             for image in images:
-                image_url = ProxyService.get_bypass_url(image["thumbnail_url"]) if "https" in base_url else image["thumbnail_url"]
+                image_url = ProxyService.get_bypass_url(image["thumbnail_url"]) if "httpss" in base_url else image["thumbnail_url"]
                 wordGramPost["Images"].append({"url": image_url})
 
         return wordGramPost
