@@ -26,6 +26,8 @@ jobs:
             echo "Deployment status Failed: $commit_message"
             curl -X POST -H "Content-Type: application/json" -d "{\"text\": \"🧪🧪🧪🚫🚫🚫\nTests were failed.\n$commit_message\"}" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
             exit 1
+          else
+            curl -X POST -H "Content-Type: application/json" -d "{\"text\": \"🧪🧪🧪✅✅✅\nTests were passed successfully.\n$commit_message\"}" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
           fi
 
       - name: setup ssh
