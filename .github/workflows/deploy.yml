@@ -17,8 +17,17 @@ jobs:
           pip install -r requirements.txt
           pip install pytest
           export PYTHONPATH=$PYTHONPATH:$(pwd)
-          pytest tests
-        
+          pytest tests || echo "Tests failed" > test_result.txt
+      
+      - name: Send message to Telegram if tests failed
+        run: |
+          if [ -f test_result.txt ]; then
+            commit_message=$(git log --format=%B -n 1 ${{ github.sha }})
+            echo "Deployment status Failed: $commit_message"
+            curl -X POST -H "Content-Type: application/json" -d "{\"text\": \"🧪🧪🧪🚫🚫🚫\nTests were failed.\n$commit_message\"}" "https://api.telegram.org/bot${{secrets.TELEGRAM_BOT_TOKEN}}/sendMessage?chat_id=-4276022020"
+            exit 1
+          fi
+
       - name: setup ssh
         id: setup_ssh
         run: |
