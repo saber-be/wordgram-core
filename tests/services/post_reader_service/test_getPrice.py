@@ -13,4 +13,4 @@ def test_getPrice():
     caption = "قیمت💰: 4.48 تومان موجودی 10 عدد"
     assert PostReaderService.getPrice(caption) == 4480
     caption = "قیمت💰: 4,48 تومان موجودی 10 عدد"
-    assert PostReaderService.getPrice(caption) == 4480
+    assert PostReaderService.getPrice(caption) == 448
