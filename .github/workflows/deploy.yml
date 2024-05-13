@@ -12,8 +12,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Run Tets
-        run: pytest tests/
+      - name: Run Unit Tests
+        run: |
+          pip install pytest
+          pytest tests
         
       - name: setup ssh
         id: setup_ssh
