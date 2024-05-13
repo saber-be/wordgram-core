@@ -15,6 +15,7 @@ jobs:
       - name: Run Unit Tests
         run: |
           pip install pytest
+          export PYTHONPATH=$PYTHONPATH:$(pwd)
           pytest tests
         
       - name: setup ssh
