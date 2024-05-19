@@ -9,6 +9,7 @@ from app.services.kafka_service import KafkaService
 from app.services.post_reader_service import PostReaderService
 from app.services.log_service import MongoHandler , FileHandler
 from app.models.updateWebSiteRequest import updateWebSiteRequest
+import app.services.client_service as client_service
 logging.basicConfig(level=logging.INFO)
 mongo_handler = MongoHandler()
 file_handler = FileHandler('logs')
@@ -36,6 +37,14 @@ def update_client_website(update_request: updateWebSiteRequest):
     if client is None:
         logging.error("Client not found for "+instagram_username+" or client is disconnected")
         return {'status': 'error', 'message': 'Client not found'}
+    
+    client_service.daily_counter_reset(instagram_username)
+
+    if update_request.force_update == False:
+        website_update_limit = client_service.check_website_update_limit(instagram_username)
+        if website_update_limit['status'] == 'error':
+            return website_update_limit
+        
     post_query = {"user.username": instagram_username}
     if update_request.SKU is not None:
         post_query["code"] = update_request.SKU
@@ -60,6 +69,8 @@ def update_client_website(update_request: updateWebSiteRequest):
             logging.info(re.text)
         else:
             logging.error(re.text)
+    
+    client_service.website_update_counter_increment(instagram_username)
     
     logging.info("Client website updated successfully")
     return {'status': 'success', 'message': 'Client website updated successfully'}
