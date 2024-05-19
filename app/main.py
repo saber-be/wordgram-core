@@ -69,6 +69,16 @@ async def register_shop(shop: Shop):
 
     # insert to mongodb
     collection = db['clients']
+    default_values = {
+        "instagram_sync_count": 0,
+        "instagram_sync_max": 30,
+        "daily_instagram_sync_count": 0,
+        "daily_instagram_sync_max": 5,
+        "website_update_count": 0,
+        "website_update_max": 50,
+        "daily_website_update_count": 0,
+        "daily_website_update_max": 10
+    }
     shop.instagram_username = shop.instagram_username.lower()
     try:
         message = 'Shop registered successfully'
@@ -95,6 +105,10 @@ async def register_shop(shop: Shop):
             data = collection.find_one(
                 {"instagram_username": shop.instagram_username})
             data = {key: data[key] for key in data if key != "_id"}
+        
+        # init default values if not exist in client collection else keep same value: 
+        insert_default_values = {key: default_values[key] for key in default_values if key not in data}
+        collection.update_one({"instagram_username": shop.instagram_username}, {"$set": insert_default_values})
         return {'status': 'success', 'message': message, 'data': data}
     except ServerSelectionTimeoutError:
         return {'status': 'error', 'message': 'Failed to connect to the MongoDB server'}

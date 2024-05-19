@@ -6,3 +6,6 @@ instagrapi>=2.0.0,<2.1.0
 pydantic_core
 Pillow>=8.1.1
 kafka-python
+mongomock
+freezegun
+setuptools
