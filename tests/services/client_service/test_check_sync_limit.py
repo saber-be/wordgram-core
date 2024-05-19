@@ -8,7 +8,6 @@ import sys
 sys.path.append('./')
 import app.services.client_service as client_service
 
-
 class TestCheckSyncLimit(unittest.TestCase):
     @patch('pymongo.MongoClient', new=mongomock.MongoClient)
     @freeze_time("2024-01-02 12:00:00")
